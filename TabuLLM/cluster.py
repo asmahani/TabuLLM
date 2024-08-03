@@ -26,7 +26,7 @@ def skmeans_lloyd_update(
     return new_similarities, new_labels, new_centroids, frobenius_norm
 
 class SphericalKMeans:
-    def __init__(self, n_clusters=3, max_iter=300, tol=1e-4, random_state=None, n_init=10):
+    def __init__(self, n_clusters=3, n_init=10, max_iter=300, tol=1e-4, random_state=None):
         self.n_clusters = n_clusters
         self.max_iter = max_iter
         self.tol = tol
