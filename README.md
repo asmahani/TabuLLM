@@ -7,6 +7,11 @@ A Python package for feature extraction from text columns in tabular data using 
 1. `Explain` - 1) Prompt generation for soliciting descriptive labels for clusters generating based on the embedding vectors, 2) Wrapper for interacting with text-generating LLMs (OpenAI, Google, Hugging Face).
 1. `Distill` - Applying k-nearest-neighbor - in supervised mode - to predict the outcome using the embedding matrix. Wrapping the KNN in cross-fit allows us to distill the high-dimensional embeddings into a single score, which can subsequently be used alongside other features in the ultimate predictive model.
 
+## Tutorials
+- [Overview of `TabuLLM` + `Embed` module](notebooks/tutorial.ipynb)
+- [`Cluster` module](notebooks/skmeans.ipynb)
+- [`Explain` module](notebooks/explain.ipynb)
+- `Distill` module
+
 ## Links
 - [*TabuLLM* in Action](https://www.medrxiv.org/content/10.1101/2024.05.14.24307372v1): Applying `TabuLLM` to pediatric cardiopulmonary bypass EHR data to predict the risk of postoperative acute kindey injury.
-- A jupyter notebook tutorial (link will be added)
