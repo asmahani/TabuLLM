@@ -165,5 +165,5 @@ def one_vs_rest(dat, col_x=None, col_y=None):
             t_stat, p_value = ttest_ind(group1, group2, equal_var=False)
             results.append((category, 'T-Statistic', t_stat, p_value))
     
-    results_df = pd.DataFrame(results, columns=['Category', 'Test Type', 'Statistic', 'P-value'])
+    results_df = pd.DataFrame(results, columns=['Category', 'Test Type', 'Statistic', 'P-value']).sort_values('Category').reset_index(drop=True)
     return results_df
