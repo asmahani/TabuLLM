@@ -88,42 +88,75 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
     def __init__(
         self
         , model_type = 'doc2vec'
-        , openai_client = None
-        , google_project_id = None
-        , google_location = None
-        , embedding_model_openai = 'text-embedding-3-large'
-        , embedding_model_st = 'neuml/pubmedbert-base-embeddings-matryoshka'
-        , embedding_model_doc2vec = 'PV-DM'
-        , embedding_model_google = 'text-embedding-004'
-        , doc2vec_epochs = 40
-        , doc2vec_vector_size = 10
-        , google_task = 'SEMANTIC_SIMILARITY'
-        , google_batch_size = 250
+        , openai_args = None
+        , google_args = None
+        , st_args = None
+        , doc2vec_args = None
         , colsep = ' || '
         , return_cols_prefix = 'X_'
     ):
         if model_type not in ('openai', 'st', 'doc2vec', 'google'):
             raise ValueError('Invalid model type')
-        if embedding_model_doc2vec not in ('PV-DM', 'PV-DBOW'):
-            raise ValueError('Doc2Vec model must be one of "PV-DM" or "PV-DBOW"')
-        
         self.model_type = model_type
-        self.openai_client = openai_client
-        self.google_project_id = google_project_id
-        self.google_location = google_location
-        self.embedding_model_openai = embedding_model_openai
-        self.embedding_model_st = embedding_model_st
-        self.embedding_model_doc2vec = embedding_model_doc2vec
-        self.embedding_model_google = embedding_model_google
+        
+        # for a selected model type, args should be provided
+        if model_type == 'openai' and not openai_args:
+            raise ValueError('OpenAI arguments must be provided for OpenAI model')
+        if model_type == 'google' and not google_args:
+            raise ValueError('Google arguments must be provided for Google model')
+        if model_type == 'st' and not st_args:
+            st_args = {}
+        if model_type == 'doc2vec' and not doc2vec_args:
+            doc2vec_args = {}
+        
+        # if openai selected, check args and augment with defaults
+        if model_type == 'openai':
+            if 'model' not in openai_args:
+                openai_args['model'] = 'text-embedding-3-large'
+            # client must be provided in the args
+            if 'client' not in openai_args:
+                raise ValueError('OpenAI client must be provided in the OpenAI arguments')
+            self.openai_args = openai_args
+        
+        # if google selected, check args and augment with defaults
+        if model_type == 'google':
+            if 'model' not in google_args:
+                google_args['model'] = 'text-embedding-004'
+            if 'task' not in google_args:
+                google_args['task'] = 'SEMANTIC_SIMILARITY'
+            if 'batch_size' not in google_args:
+                google_args['batch_size'] = 250
+            if 'project_id' not in google_args:
+                raise ValueError('Google project ID must be provided in the Google arguments')
+            if 'location' not in google_args:
+                raise ValueError('Google location must be provided in the Google arguments')
+            self.google_args = google_args
+        
+        # if st selected, check args and augment with defaults
+        if model_type == 'st':
+            if 'model' not in st_args:
+                st_args['model'] = 'sentence-transformers/all-MiniLM-L6-v2'
+            self.st_args = st_args
+        
+        # if doc2vec selected, check args and augment with defaults
+        if model_type == 'doc2vec':
+            if 'model' not in doc2vec_args:
+                doc2vec_args['model'] = 'PV-DM'
+            else:
+                if doc2vec_args['model'] not in ('PV-DM', 'PV-DBOW'):
+                    raise ValueError('Doc2Vec model must be one of "PV-DM" or "PV-DBOW"')
+            if 'epochs' not in doc2vec_args:
+                doc2vec_args['epochs'] = 40
+            if 'vector_size' not in doc2vec_args:
+                doc2vec_args['vector_size'] = 50
+            self.doc2vec_args = doc2vec_args
+        
         self.colsep = colsep
         self.return_cols_prefix = return_cols_prefix
-        self.doc2vec_epochs = doc2vec_epochs
-        self.doc2vec_vector_size = doc2vec_vector_size
-        self.google_task = google_task
-        self.google_batch_size = google_batch_size
-        self.doc2vec_model = None
+        self.doc2vec_fit = None
     
     def _fit_doc2vec(self, X, y = None):
+        args = self.doc2vec_args
         if not (X.dtypes == 'object').all():
             raise TypeError('All columns of X must be of string (object) type')
         
@@ -133,9 +166,15 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
         ).tolist()
         
         corpus = [TaggedDocument(words = simple_preprocess(doc), tags=[str(i)]) for i, doc in enumerate(Xstr)]
-        alg = 1 if self.embedding_model_doc2vec == 'PV-DM' else 0
-        model = Doc2Vec(corpus, vector_size = self.doc2vec_vector_size, window=2, min_count=1, epochs = self.doc2vec_epochs, dm = alg)
-        self.doc2vec_model = model
+        alg = 1 if args['model'] == 'PV-DM' else 0
+        model = Doc2Vec(
+            corpus
+            , vector_size = args['vector_size']
+            , window=2, min_count=1
+            , epochs = args['epochs']
+            , dm = alg
+        )
+        self.doc2vec_fit = model
         return self
     
     def fit(self, X, y = None):
@@ -218,15 +257,16 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
         )
 
     def _transform_google(self, X):
-        vertexai.init(project=self.google_project_id, location=self.google_location)
-        model = TextEmbeddingModel.from_pretrained(self.embedding_model_google)
-        if self.embedding_model_google == 'textembedding-gecko@001':
+        args = self.google_args
+        vertexai.init(project = args['project_id'], location = args['location'])
+        model = TextEmbeddingModel.from_pretrained(args['model'])
+        if args['model'] == 'textembedding-gecko@001':
             inputs = [TextEmbeddingInput(text) for text in X]
         else:
-            inputs = [TextEmbeddingInput(text, self.google_task) for text in X]
+            inputs = [TextEmbeddingInput(text, args['task']) for text in X]
         kwargs = {}
         embeddings = []
-        batch_size = self.google_batch_size
+        batch_size = args['batch_size']
         for i in range(0, len(inputs), batch_size):
             batch_inputs = inputs[i:i+batch_size]
             batch_embeddings = model.get_embeddings(batch_inputs, **kwargs)
@@ -234,11 +274,12 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
         return np.array([embedding.values for embedding in embeddings])
     
     def _transform_doc2vec(self, X):
-        out = [self.doc2vec_model.infer_vector(simple_preprocess(doc)) for doc in X]
+        out = [self.doc2vec_fit.infer_vector(simple_preprocess(doc)) for doc in X]
         return np.array(out)
 
     def _transform_st(self, X):
-        model_name = self.embedding_model_st
+        args = self.st_args
+        model_name = args['model']
         model_name_split = model_name.split('@')
         assert len(model_name_split) <= 2, 'Too many @ characters in model name'
         if len(model_name_split) == 1:
@@ -248,12 +289,13 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
         return model.encode(X) 
     
     def _transform_openai(self, X):
-        if not self.openai_client:
+        args = self.openai_args
+        if not args['client']:
             raise ValueError('Invalid OpenAI client')
         
-        ret = self.openai_client.embeddings.create(
+        ret = args['client'].embeddings.create(
             input = X
-            , model = self.embedding_model_openai
+            , model = args['model']
         )
         ret = np.array([ret.data[n].embedding for n in range(len(ret.data))])
         return ret
