@@ -19,7 +19,7 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
 
     Parameters
     ----------
-    type : str, default='doc2vec'
+    model_type : str, default='doc2vec'
         The type of embedding model to use. Must be one of 'openai', 'st', 'doc2vec', or 'google'.
     openai_client : object, optional
         The OpenAI client object for accessing OpenAI's embedding models.
@@ -55,7 +55,7 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
 
     Attributes
     ----------
-    type : str
+    model_type : str
         The type of embedding model being used.
     openai_client : object
         The OpenAI client object.
@@ -87,7 +87,7 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
     
     def __init__(
         self
-        , type = 'doc2vec'
+        , model_type = 'doc2vec'
         , openai_client = None
         , google_project_id = None
         , google_location = None
@@ -102,12 +102,12 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
         , colsep = ' || '
         , return_cols_prefix = 'X_'
     ):
-        if not (type in ('openai', 'st', 'doc2vec', 'google')):
-            raise ValueError('Invalid embedding type')
-        if not (embedding_model_doc2vec in ('PV-DM', 'PV-DBOW')):
+        if model_type not in ('openai', 'st', 'doc2vec', 'google'):
+            raise ValueError('Invalid model type')
+        if embedding_model_doc2vec not in ('PV-DM', 'PV-DBOW'):
             raise ValueError('Doc2Vec model must be one of "PV-DM" or "PV-DBOW"')
         
-        self.type = type
+        self.model_type = model_type
         self.openai_client = openai_client
         self.google_project_id = google_project_id
         self.google_location = google_location
@@ -121,8 +121,7 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
         self.doc2vec_vector_size = doc2vec_vector_size
         self.google_task = google_task
         self.google_batch_size = google_batch_size
-        
-        pass
+        self.doc2vec_model = None
     
     def _fit_doc2vec(self, X, y = None):
         if not (X.dtypes == 'object').all():
@@ -155,10 +154,10 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
         self : object
             Returns the instance itself.
         """
-        if self.type == 'doc2vec':
+        if self.model_type == 'doc2vec':
             return self._fit_doc2vec(X, y)
-        else:
-            return self
+        
+        return self
 
     def fit_transform(self, X, y = None):
         """
@@ -176,7 +175,7 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
         embeddings : numpy.ndarray of shape (n_samples, embedding_dim)
             The transformed embeddings.
         """
-        if self.type == 'doc2vec':
+        if self.model_type == 'doc2vec':
             self._fit_doc2vec(X, y)
         return self.transform(X)
     
@@ -203,17 +202,20 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
             , axis=1
         ).tolist()
         
-        if self.type == 'openai':
+        if self.model_type == 'openai':
             arr = self._transform_openai(Xstr)
-        elif self.type == 'st':
+        elif self.model_type == 'st':
             arr = self._transform_st(Xstr)
-        elif self.type == 'doc2vec':
+        elif self.model_type == 'doc2vec':
             arr = self._transform_doc2vec(Xstr)
-        elif self.type == 'google':
+        elif self.model_type == 'google':
             arr = self._transform_google(Xstr)
         else:
-            raise ValueError('Invalid embedding type')
-        return pd.DataFrame(arr, columns = [self.return_cols_prefix + str(i) for i in range(arr.shape[1])])
+            raise ValueError('Invalid model type')
+        return pd.DataFrame(
+            arr
+            , columns = [self.return_cols_prefix + str(i) for i in range(arr.shape[1])]
+        )
 
     def _transform_google(self, X):
         vertexai.init(project=self.google_project_id, location=self.google_location)
