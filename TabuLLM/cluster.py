@@ -1,5 +1,7 @@
 import numpy as np
-from sklearn.utils.validation import check_array
+from sklearn.base import BaseEstimator, ClusterMixin
+from sklearn.utils.validation import check_array, check_is_fitted
+from sklearn.utils import check_random_state
 
 def skmeans_lloyd_update(
         X
@@ -25,7 +27,36 @@ def skmeans_lloyd_update(
 
     return new_similarities, new_labels, new_centroids, frobenius_norm
 
-class SphericalKMeans:
+class SphericalKMeans(BaseEstimator, ClusterMixin):
+    """
+    Spherical K-Means clustering algorithm.
+    
+    Parameters
+    ----------
+    n_clusters : int, default=3
+        The number of clusters to form.
+    n_init : int, default=10
+        Number of time the k-means algorithm will be run with different centroid seeds.
+    max_iter : int, default=300
+        Maximum number of iterations of the k-means algorithm for a single run.
+    tol : float, default=1e-4
+        Relative tolerance with regards to inertia to declare convergence.
+    random_state : int, RandomState instance or None, default=None
+        Determines random number generation for centroid initialization.
+        
+    Attributes
+    ----------
+    cluster_centers_ : array, shape (n_clusters, n_features)
+        Coordinates of cluster centers.
+    labels_ : array, shape (n_samples,)
+        Labels of each point.
+    inertia_ : float
+        Sum of squared distances of samples to their closest cluster center.
+    n_iter_ : int
+        Number of iterations run.
+    similarity_matrix : array, shape (n_samples, n_clusters)
+        Similarity matrix between samples and cluster centers.
+    """
     def __init__(self, n_clusters=3, n_init=10, max_iter=300, tol=1e-4, random_state=None):
         self.n_clusters = n_clusters
         self.max_iter = max_iter
@@ -43,13 +74,11 @@ class SphericalKMeans:
         best_centroids = None
         best_labels = None
         best_simiarities = None
+        random_state = check_random_state(self.random_state)
 
         for _ in range(self.n_init):
-            if self.random_state is not None:
-                np.random.seed(self.random_state)
-            
             # Initialize centroids
-            centroids = self._initialize_centroids(X_unique)
+            centroids = self._initialize_centroids(X_unique, random_state)
             similarities = np.dot(X, centroids.T)  # Initial similarities
             
             iter_count = 0
@@ -65,7 +94,7 @@ class SphericalKMeans:
                     iter_count += 1
                 except Exception as e:
                     # if centroids are empty, reset and continue
-                    centroids = self._initialize_centroids(X)
+                    centroids = self._initialize_centroids(X_unique, random_state)
                     similarities = np.dot(X, centroids.T)
                     iter_count = 0  # Reset iteration count
                     continue
@@ -82,12 +111,13 @@ class SphericalKMeans:
         self.labels_ = best_labels
         self.inertia_ = best_inertia
         self.similarity_matrix = best_simiarities
+        self.n_iter_ = iter_count
 
         return self
 
-    def _initialize_centroids(self, Xunique):
-        indices = np.random.choice(Xunique.shape[0], self.n_clusters, replace=False)
-        return Xunique[indices]
+    def _initialize_centroids(self, X, random_state):
+        indices = random_state.choice(X.shape[0], self.n_clusters, replace=False)
+        return X[indices]
 
     def _normalize(self, X):
         norms = np.linalg.norm(X, axis=1, keepdims=True)
@@ -95,7 +125,7 @@ class SphericalKMeans:
 
     def _assign_clusters(self, X, hard=True):
         # Calculate the cosine similarity between each point and each centroid
-        similarities = np.dot(X, self.centroids.T)
+        similarities = np.dot(X, self.cluster_centers_.T)
         if hard:
             # Assign each point to the nearest centroid (highest similarity)
             return np.argmax(similarities, axis=1)
@@ -103,6 +133,7 @@ class SphericalKMeans:
             return similarities
     
     def transform(self, X):
+        check_is_fitted(self, ['cluster_centers_'])
         X = check_array(X)
         X = self._normalize(X)
         return self._assign_clusters(X, hard=False)
@@ -112,11 +143,11 @@ class SphericalKMeans:
         return self.similarity_matrix
 
     def predict(self, X):
+        check_is_fitted(self, ['cluster_centers_'])
         X = check_array(X)
         X = self._normalize(X)
         return self._assign_clusters(X, hard=True)
 
     def fit_predict(self, X, y = None):
-        self.fit(X)
-        return self.labels_
+        return self.fit(X, y).labels_
 
