@@ -8,7 +8,14 @@ A Python package for feature extraction from text columns in tabular data using 
 1. `compress` - Applying k-nearest-neighbor - in supervised mode - to predict the outcome using the embedding matrix. Wrapping the KNN in cross-fit allows us to compress the high-dimensional embeddings into a single score - while controlling overfitting - which can subsequently be used alongside other features in the ultimate predictive model.
 
 # `TabuLLM` Tutorials
-- [Overview + `embed` module](notebooks/tutorial.ipynb)
+
+The following is a list of tutorials provided in the package github repo, along with a list of topics covered in each:
+
+- [Overview + `embed` module](notebooks/tutorial.ipynb):
+    - An expanded context/motivation for the package
+    - Overview of the `AKI` dataset used throughout the tutorials
+    - Introduction of the class `TextColumnTransformer` and how it can be used to generate embedding using various model types, and
+    - Options for handling multiple text columns in the data.
 - [`cluster` module](notebooks/skmeans.ipynb)
 - [`explain` module](notebooks/explain.ipynb)
 - [`compress` module](notebooks/compress.ipynb)
