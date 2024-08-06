@@ -3,7 +3,7 @@ from sklearn.base import BaseEstimator, ClusterMixin
 from sklearn.utils.validation import check_array, check_is_fitted
 from sklearn.utils import check_random_state
 
-def skmeans_lloyd_update(
+def _skmeans_lloyd_update(
         X
         , centroids
         , similarities
@@ -66,6 +66,21 @@ class SphericalKMeans(BaseEstimator, ClusterMixin):
         self.inertia_ = None
 
     def fit(self, X, y=None):
+        """
+        Fit spherical k-means clustering to data.
+
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            Training instances to cluster.
+        y : Ignored
+            Not used, present here for API consistency by convention.
+
+        Returns
+        -------
+        self : object
+            Fitted estimator.
+        """        
         X = check_array(X)
         X = self._normalize(X)
         X_unique = np.unique(X, axis = 0)
@@ -85,7 +100,7 @@ class SphericalKMeans(BaseEstimator, ClusterMixin):
             while iter_count < self.max_iter:
                 try:
                     # Update centroids and calculate inertia using optimized Lloyd update
-                    similarities, labels, centroids, frob_norm = skmeans_lloyd_update(X, centroids, similarities)
+                    similarities, labels, centroids, frob_norm = _skmeans_lloyd_update(X, centroids, similarities)
                     
                     # Check for convergence
                     if frob_norm <= self.tol:
@@ -129,25 +144,85 @@ class SphericalKMeans(BaseEstimator, ClusterMixin):
         if hard:
             # Assign each point to the nearest centroid (highest similarity)
             return np.argmax(similarities, axis=1)
-        else:
-            return similarities
+        return similarities
     
     def transform(self, X):
+        """
+        Transform X to a cluster-distance space.
+
+        In the new space, each dimension is the cosine similarity to the cluster centers.
+
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            New data to transform.
+
+        Returns
+        -------
+        similarities : ndarray of shape (n_samples, n_clusters)
+            Transformed array.
+        """
         check_is_fitted(self, ['cluster_centers_'])
         X = check_array(X)
         X = self._normalize(X)
         return self._assign_clusters(X, hard=False)
     
     def fit_transform(self, X):
+        """
+        Compute clustering and transform X to cluster-distance space.
+
+        Equivalent to calling fit(X) followed by transform(X).
+
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            Training instances to cluster and transform.
+
+        Returns
+        -------
+        similarities : ndarray of shape (n_samples, n_clusters)
+            Transformed array.
+        """
         self.fit(X)
         return self.similarity_matrix
 
     def predict(self, X):
+        """
+        Predict the closest cluster each sample in X belongs to.
+
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            New data to predict.
+
+        Returns
+        -------
+        labels : ndarray of shape (n_samples,)
+            Index of the cluster each sample belongs to.
+        """
         check_is_fitted(self, ['cluster_centers_'])
         X = check_array(X)
         X = self._normalize(X)
         return self._assign_clusters(X, hard=True)
 
-    def fit_predict(self, X, y = None):
+    def fit_predict(self, X, y=None):
+        """
+        Compute cluster centers and predict cluster index for each sample.
+
+        Convenience method; equivalent to calling fit(X) followed by predict(X).
+
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            New data to fit and predict.
+
+        y : Ignored
+            Not used, present here for API consistency by convention.
+
+        Returns
+        -------
+        labels : ndarray of shape (n_samples,)
+            Index of the cluster each sample belongs to.
+        """
         return self.fit(X, y).labels_
 

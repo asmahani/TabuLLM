@@ -78,7 +78,7 @@ def generate_prompt(
 
 def generate_response(
     prompt
-    , type = 'openai'
+    , model_type = 'openai'
     , openai_client = None
     , google_project_id = None
     , google_location = None
@@ -91,7 +91,7 @@ def generate_response(
     
     :param prompt: The prompt text to send to the model.
     :type prompt: str
-    :param type: The type of model to use ('openai' or 'google').
+    :param model_type: The type of text-completion model to use ('openai' or 'google').
     :type type: str, optional
     :param openai_client: An instance of the OpenAI API client.
     :type openai_client: OpenAI.Client, optional
@@ -112,10 +112,10 @@ def generate_response(
     
     if not isinstance(prompt, str) or not prompt:
         raise ValueError("Prompt must be a non-empty string.")
-    if not type in ['openai', 'google']:
+    if model_type not in ['openai', 'google']:
         raise ValueError("Type must be either 'openai' or 'google'.")
     
-    if type == 'openai':
+    if model_type == 'openai':
         try:
             response = openai_client.chat.completions.create(
                 model = openai_model
@@ -126,7 +126,7 @@ def generate_response(
             )
             return response.choices[0].message.content
         except Exception as e:
-            raise RuntimeError(f"Failed to generate completion from OpenAI API: {e}")
+            raise RuntimeError(f"Failed to generate completion from OpenAI API: {e}") from e
     else:
         try:
             vertexai.init(project=google_project_id, location=google_location)
@@ -134,11 +134,27 @@ def generate_response(
             response = model.generate_content(prompt)
             return response.text
         except Exception as e:
-            raise RuntimeError(f"Failed to generate completion from Google API: {e}")
+            raise RuntimeError(f"Failed to generate completion from Google API: {e}") from e
     
 
 
 def one_vs_rest(dat, col_x=None, col_y=None):
+    """
+    Perform a one-vs-rest analysis on the given dataset.
+
+    This function compares each category in the specified column (col_x) against all other categories
+    in terms of the response variable (col_y). If the response variable is binary, it performs Fisher's
+    Exact Test. If the response variable is continuous, it performs an independent t-test.
+
+    :param dat: The input DataFrame containing the data.
+    :type dat: pd.DataFrame
+    :param col_x: The name of the column containing the categories to compare. If None, the first column is used.
+    :type col_x: str, optional
+    :param col_y: The name of the column containing the response variable. If None, the second column is used.
+    :type col_y: str, optional
+    :return: A DataFrame containing the results of the one-vs-rest analysis, including the category, test type, statistic, and p-value.
+    :rtype: pd.DataFrame
+    """
     if not col_x:
         col_x = dat.columns[0]
     if not col_y:
@@ -165,5 +181,8 @@ def one_vs_rest(dat, col_x=None, col_y=None):
             t_stat, p_value = ttest_ind(group1, group2, equal_var=False)
             results.append((category, 'T-Statistic', t_stat, p_value))
     
-    results_df = pd.DataFrame(results, columns=['Category', 'Test Type', 'Statistic', 'P-value']).sort_values('Category').reset_index(drop=True)
+    results_df = pd.DataFrame(
+        results
+        , columns=['Category', 'Test Type', 'Statistic', 'P-value']
+    ).sort_values('Category').reset_index(drop=True)
     return results_df
