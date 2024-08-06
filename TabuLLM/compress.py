@@ -1,5 +1,5 @@
-from sklearn.base import BaseEstimator, TransformerMixin, ClassifierMixin
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
+from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.utils.validation import check_X_y, check_array
 from sklearn.utils.multiclass import type_of_target
 from sklearn.model_selection import KFold, RepeatedKFold
@@ -102,3 +102,76 @@ class CompressClassifier(BaseEstimator, ClassifierMixin):
         if self.logit:
             ret = 1.0 / (1.0 + np.exp(-ret))
         return ret
+
+class CompressRegressor(BaseEstimator, RegressorMixin):
+    def __init__(self, nx=None, ncv=5, **kwargs):
+        super().__init__()
+        self.knn = KNeighborsRegressor(**kwargs)
+        self.nx = nx
+        self.ncv = ncv
+
+    def fit(self, X, y):
+        X = X.to_numpy() if hasattr(X, 'to_numpy') else np.array(X)
+        y = np.array(y)
+        
+        if not self.nx:
+            self.nx = X.shape[1]
+        
+        if self.nx > X.shape[1]:
+            raise ValueError('X has fewer columns than nx')
+        
+        X, y = check_X_y(X, y)
+        
+        # Select subset of columns and renormalize
+        X = np.apply_along_axis(lambda x: x / np.sqrt(np.sum(x * x)), 1, X[:, :self.nx])
+
+        if isinstance(self.ncv, int) and self.ncv < 2:
+            # No cross-fitting
+            self.trained_model = copy.deepcopy(self.knn).fit(X, y)
+            self.insample_predictions = self.trained_model.predict(X)
+            return self
+        
+        # Create folds
+        if isinstance(self.ncv, (KFold, RepeatedKFold)):
+            kf = self.ncv
+        else:
+            kf = KFold(n_splits=self.ncv, shuffle=True)
+        
+        kf.get_n_splits(X)
+        self.kfolds = kf
+        
+        # Train model within each fold
+        trained_models = []
+        insample_predictions = np.empty(len(y), dtype=float)
+        for train_index, test_index in kf.split(X):
+            tmp_knn = copy.deepcopy(self.knn).fit(X[train_index, :], y[train_index])
+            tmp_pred = tmp_knn.predict(X[test_index, :])
+            insample_predictions[test_index] = tmp_pred
+            trained_models.append(tmp_knn)
+
+        self.trained_models = trained_models
+        self.insample_predictions = np.reshape(insample_predictions, (insample_predictions.size, 1))
+        return self
+
+    def fit_transform(self, X, y):
+        self.fit(X, y)
+        return self.insample_predictions
+        
+    def transform(self, X):
+        X = check_array(X)
+        
+        # Select subset of columns and renormalize
+        X = np.apply_along_axis(lambda x: x / np.sqrt(np.sum(x * x)), 1, X[:, :self.nx])
+        
+        if isinstance(self.ncv, int) and self.ncv < 2:
+            return self.trained_model.predict(X)
+        
+        all_preds = np.empty((len(X), self.kfolds.get_n_splits()), dtype=float)
+        for n, model in enumerate(self.trained_models):
+            tmp_pred = model.predict(X)
+            all_preds[:, n] = tmp_pred
+        ret = np.mean(all_preds, axis=1)
+        return np.reshape(ret, (ret.size, 1))
+
+    def predict(self, X):
+        return self.transform(X)
