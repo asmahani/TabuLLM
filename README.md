@@ -17,8 +17,19 @@ The following is a list of tutorials provided in the package github repo, along 
     - Introduction of the class `TextColumnTransformer` and how it can be used to generate embedding using various model types, and
     - Options for handling multiple text columns in the data.
 - [`cluster` module](notebooks/skmeans.ipynb)
+    - Why *spherical* k-means for text embeddings?
+    - Measuring and improving cluster stability
+    - Using soft and hard cluster labels as features
 - [`explain` module](notebooks/explain.ipynb)
+    - The proposed explainability framework
+    - Maximum context length in LLMs
+    - Cost analysis for commercial LLMs
+    - Generating the one-vs-rest (OVR) table
 - [`compress` module](notebooks/compress.ipynb)
+    - Conceptual framework: Why KNN + cross-fit?
+    - Creating a (*scikit-learn*) predictive pipeline
+    - Benefits of cross-fit
+    - Advantage of KNN over k-means
 
 # Links
 - [*TabuLLM* in Action](https://www.medrxiv.org/content/10.1101/2024.05.14.24307372v1): Applying `TabuLLM` to pediatric cardiopulmonary bypass EHR data to predict the risk of postoperative acute kindey injury.
