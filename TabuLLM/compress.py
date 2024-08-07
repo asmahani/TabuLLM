@@ -77,7 +77,8 @@ class CompressClassifier(BaseEstimator, ClassifierMixin):
         if isinstance(self.ncv, int) and self.ncv < 2:
             # No cross-fitting
             self.trained_models = [copy.deepcopy(self.knn).fit(X, y)]
-            self.insample_prediction_proba = self.trained_model[0].predict_proba(X)[:, 1]
+            insample_prediction_proba = self.trained_models[0].predict_proba(X)[:, 1]
+            self.insample_prediction_proba = np.reshape(insample_prediction_proba, (insample_prediction_proba.size, 1))
             return self
         
         # Create folds
@@ -150,6 +151,7 @@ class CompressClassifier(BaseEstimator, ClassifierMixin):
                 tmp_pred = (tmp_pred * self.knn.n_neighbors + 1) / (self.knn.n_neighbors + 2)
             if self.logit:
                 tmp_pred = np.log(tmp_pred / (1.0 - tmp_pred))
+            tmp_pred = np.reshape(tmp_pred, (tmp_pred.size, 1))
             return tmp_pred
         
         all_preds = np.empty((len(X), self.kfolds.get_n_splits()), dtype=float)
@@ -264,7 +266,8 @@ class CompressRegressor(BaseEstimator, RegressorMixin):
         if isinstance(self.ncv, int) and self.ncv < 2:
             # No cross-fitting
             self.trained_models = [copy.deepcopy(self.knn).fit(X, y)]
-            self.insample_predictions = self.trained_models[0].predict(X)
+            insample_predictions = self.trained_models[0].predict(X)
+            self.insample_predictions = np.reshape(insample_predictions, (insample_predictions.size, 1))
             return self
         
         # Create folds
@@ -328,7 +331,8 @@ class CompressRegressor(BaseEstimator, RegressorMixin):
         X = np.apply_along_axis(lambda x: x / np.sqrt(np.sum(x * x)), 1, X[:, :self.nx])
         
         if isinstance(self.ncv, int) and self.ncv < 2:
-            return self.trained_models[0].predict(X)
+            ret = self.trained_models[0].predict(X)
+            return np.reshape(ret, (ret.size, 1))
         
         all_preds = np.empty((len(X), self.kfolds.get_n_splits()), dtype=float)
         for n, model in enumerate(self.trained_models):
