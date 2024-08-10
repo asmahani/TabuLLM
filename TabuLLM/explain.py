@@ -2,11 +2,12 @@ import numpy as np
 import pandas as pd
 from scipy.stats import fisher_exact, ttest_ind
 import vertexai
-from vertexai.generative_models import GenerativeModel
+from vertexai.generative_models import GenerativeModel, GenerationConfig
 from pydantic import BaseModel
+import json
 
 class GroupLabel(BaseModel):
-    number: int
+    group_number: int
     description_short: str
     description_long: str
 
@@ -15,7 +16,28 @@ class MultipleGroupLabels(BaseModel):
 
     # method to convert the response to a DataFrame
     def to_df(self):
-        return pd.DataFrame([group.model_dump() for group in self.groups]).sort_values('number').reset_index(drop=True)
+        return pd.DataFrame([group.model_dump() for group in self.groups]).sort_values('group_number').reset_index(drop=True)
+
+    def get_response_schema():
+        response_schema = {
+            "type": "object",
+            "properties": {
+                "groups": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "group_number": {"type": "integer"},
+                            "description_short": {"type": "string"},
+                            "description_long": {"type": "string"},
+                        },
+                        "required": ["group_number", "description_short", "description_long"],
+                    },
+                },
+            },
+            "required": ["groups"],
+        }
+        return response_schema
 
 
 def generate_prompt(
@@ -84,9 +106,6 @@ def generate_prompt(
         my_body_list.append(substring)
 
     my_body_string = '\n\n=====\n\n'.join(my_body_list)
-
-    #my_full_prompt = preamble + '\n\n=====\n\n' + my_body_string
-    
     return (preamble, my_body_string)
 
 
@@ -97,7 +116,7 @@ def generate_response(
     , openai_client = None
     , google_project_id = None
     , google_location = None
-    , openai_model = 'gpt-4-turbo'
+    , openai_model = 'gpt-4o-mini'
     , google_model = 'gemini-1.5-pro-001'
 ):
     """
@@ -136,16 +155,27 @@ def generate_response(
                     {"role": "system", "content": prompt_instructions},
                     {"role": "user", "content": prompt_body}
                 ]
+                , response_format=MultipleGroupLabels
             )
-            return response.choices[0].message.parsed.to_df()
+            return response.choices[0].message.parsed.to_df()[['group_number', 'description_short', 'description_long']]
         except Exception as e:
             raise RuntimeError(f"Failed to generate completion from OpenAI API: {e}") from e
     else:
         try:
+            prompt_full = prompt_instructions + '\n\n=====\n\n' + prompt_body
             vertexai.init(project=google_project_id, location=google_location)
             model = GenerativeModel(google_model)
-            response = model.generate_content(prompt)
-            return response.text
+            response_schema = MultipleGroupLabels.get_response_schema()
+            response = model.generate_content(
+                prompt_full
+                , generation_config = GenerationConfig(
+                    response_mime_type = "application/json"
+                    , response_schema = response_schema
+                )
+            )
+            response_json = json.loads(response.text)
+            df = pd.DataFrame(response_json['groups'])
+            return df[['group_number', 'description_short', 'description_long']]
         except Exception as e:
             raise RuntimeError(f"Failed to generate completion from Google API: {e}") from e
     
@@ -185,17 +215,23 @@ def one_vs_rest(dat, col_x=None, col_y=None):
             table = pd.crosstab(dat[col_x] == category, dat[col_y])
             # Calculate Fisher's Exact Test
             odds_ratio, p_value = fisher_exact(table, alternative='two-sided')
-            results.append((category, 'Odds Ratio', odds_ratio, p_value))
+            results.append((category, odds_ratio, p_value))
         else:
             # Split the data into the category of interest and the rest
             group1 = dat[dat[col_x] == category][col_y]
             group2 = dat[dat[col_x] != category][col_y]
             # Perform an independent t-test
             t_stat, p_value = ttest_ind(group1, group2, equal_var=False)
-            results.append((category, 'T-Statistic', t_stat, p_value))
+            results.append((category, t_stat, p_value))
     
+    if is_binary:
+        column_names = ['Category', 'Odds Ratio', 'P-value']
+    else:
+        column_names = ['Category', 'T-Statistic', 'P-value']
+
     results_df = pd.DataFrame(
         results
-        , columns=['Category', 'Test Type', 'Statistic', 'P-value']
+        , columns = column_names
     ).sort_values('Category').set_index('Category')
+    results_df.index.name = None
     return results_df
