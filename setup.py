@@ -14,6 +14,7 @@ setup(
         , 'sentence-transformers'
         , 'gensim'
         , 'vertexai'
+        , 'pydantic'
     ],
     # Additional metadata about your package.
     author='Alireza S. Mahani',

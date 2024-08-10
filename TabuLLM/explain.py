@@ -3,6 +3,19 @@ import pandas as pd
 from scipy.stats import fisher_exact, ttest_ind
 import vertexai
 from vertexai.generative_models import GenerativeModel
+from pydantic import BaseModel
+
+class GroupLabel(BaseModel):
+    number: int
+    description_short: str
+    description_long: str
+
+class MultipleGroupLabels(BaseModel):
+    groups: list[GroupLabel]
+
+    # method to convert the response to a DataFrame
+    def to_df(self):
+        return pd.DataFrame([group.model_dump() for group in self.groups]).sort_values('number').reset_index(drop=True)
 
 
 def generate_prompt(
@@ -59,7 +72,8 @@ def generate_prompt(
     if preamble == '':
         preamble = (f"The following is a list of {str(n_obs)} {prompt_observations}. Text lines represent {prompt_texts}."
                   f" {prompt_observations.capitalize()} have been grouped into {str(n_cluster)} groups, according to their {prompt_texts}."
-                  " Please suggest group labels that are representative of their members, and also distinct from each other:"
+                  " Please suggest group labels that are representative of their members, and also distinct from each other."
+                  " Follow the provided template to return - for each group - the group number, a short desciption / group label, and a long description."
                  )
 
     my_body_list = []
@@ -71,13 +85,14 @@ def generate_prompt(
 
     my_body_string = '\n\n=====\n\n'.join(my_body_list)
 
-    my_full_prompt = preamble + '\n\n=====\n\n' + my_body_string
+    #my_full_prompt = preamble + '\n\n=====\n\n' + my_body_string
     
-    return my_full_prompt
+    return (preamble, my_body_string)
 
 
 def generate_response(
-    prompt
+    prompt_instructions
+    , prompt_body
     , model_type = 'openai'
     , openai_client = None
     , google_project_id = None
@@ -110,21 +125,19 @@ def generate_response(
     :raises RuntimeError: If there is an issue with the API call.
     """
     
-    if not isinstance(prompt, str) or not prompt:
-        raise ValueError("Prompt must be a non-empty string.")
     if model_type not in ['openai', 'google']:
         raise ValueError("Type must be either 'openai' or 'google'.")
     
     if model_type == 'openai':
         try:
-            response = openai_client.chat.completions.create(
+            response = openai_client.beta.chat.completions.parse(
                 model = openai_model
                 , messages = [
-                    {"role": "user", "content": prompt}
+                    {"role": "system", "content": prompt_instructions},
+                    {"role": "user", "content": prompt_body}
                 ]
-                #, temperature = openai_temperature
             )
-            return response.choices[0].message.content
+            return response.choices[0].message.parsed.to_df()
         except Exception as e:
             raise RuntimeError(f"Failed to generate completion from OpenAI API: {e}") from e
     else:
@@ -161,7 +174,7 @@ def one_vs_rest(dat, col_x=None, col_y=None):
         col_y = dat.columns[1]
     
     results = []
-    categories = dat[col_x].unique()
+    categories = sorted(dat[col_x].unique())
     
     # Determine if the response variable is binary or continuous
     is_binary = dat[col_y].nunique() == 2
@@ -184,5 +197,5 @@ def one_vs_rest(dat, col_x=None, col_y=None):
     results_df = pd.DataFrame(
         results
         , columns=['Category', 'Test Type', 'Statistic', 'P-value']
-    ).sort_values('Category').reset_index(drop=True)
+    ).sort_values('Category').set_index('Category')
     return results_df
