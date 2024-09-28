@@ -1,5 +1,14 @@
 # asm additions
 *.csv
+*.pdf
+*.aux
+*.pytxcode
+*.gz
+*.out
+*.bst
+*.cls
+*.jpeg
+*.jpg
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

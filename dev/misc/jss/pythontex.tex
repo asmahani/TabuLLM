@@ -1,0 +1,88 @@
+\documentclass[article]{jss}
+
+%% -- LaTeX packages and custom commands ---------------------------------------
+
+%% recommended packages
+\usepackage{orcidlink,lmodern}
+
+%% use PythonTeX package for running Python code
+\usepackage{pythontex}
+
+%% additional package (optional)
+\usepackage{framed}
+
+%% custom commands for formatting
+%\newcommand{\pkg}[1]{\texttt{#1}}
+%\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\fct}[1]{\texttt{#1()}}
+
+%% -- Article metainformation (author, title, ...) -----------------------------
+
+\author{Alireza S. Mahani~\orcidlink{0000-0002-7932-6681}\\Statman Solution Ltd.}
+\Plainauthor{Alireza S. Mahani}
+
+\title{\pkg{TabuLLM}: Feature Extraction from Tabular Data Text using Large Language Models (LLMs)}
+\Plaintitle{TabuLLM: Feature Extraction from Tabular Data Text using Large Language Models (LLMs)}
+\Shorttitle{Feature Extraction using LLMs}
+
+\Abstract{
+This article demonstrates how to document and showcase a Python package using 
+\LaTeX\ and PythonTeX. The article includes an introduction to the package, 
+its main functionalities, and some example code snippets with outputs 
+generated using PythonTeX.
+}
+
+\Keywords{Python, PythonTeX, code demo, package}
+\Plainkeywords{Python, PythonTeX, code demo, package}
+
+\Address{
+  Your Name\\
+  Your Department\\
+  Your Institution\\
+  Your Address\\
+  E-mail: \email{your.email@example.com}\\
+  URL: \url{https://yourwebsite.com/}
+}
+
+\begin{document}
+
+%% -- Introduction -------------------------------------------------------------
+\section[Introduction to My Python Package]{Introduction to My Python Package} \label{sec:intro}
+
+\begin{leftbar}
+This article introduces the Python package \pkg{mypackage}. The package provides 
+useful functions for data analysis, manipulation, and visualization. In this 
+document, we demonstrate some of the core functionalities using live Python 
+code examples and inline outputs generated via PythonTeX.
+\end{leftbar}
+
+The \pkg{mypackage} simplifies common tasks in Python and provides an 
+intuitive interface. Below, we demonstrate the usage of its main function 
+\code{add_numbers()}.
+
+\section{Code and Demo} \label{sec:code-demo}
+
+\subsection{Simple Function Example}
+
+\begin{pyverbatim}
+def add_numbers(a, b):
+    return a + b
+\end{pyverbatim}
+
+
+%% -- Conclusion ---------------------------------------------------------------
+\section{Conclusion} \label{sec:conclusion}
+
+In this article, we demonstrated how to document a Python package and 
+illustrate its usage with PythonTeX. The package \pkg{mypackage} offers 
+functions such as \code{add_numbers()} and \code{multiply_numbers()}, making 
+it easier to perform basic arithmetic operations. Future versions will include 
+more advanced features for data processing.
+
+\section*{Computational Details}
+
+This article was compiled using PythonTeX with \LaTeX\ and Python 3.x. 
+The code snippets were executed inline, and outputs were integrated into 
+the document automatically.
+
+\end{document}
