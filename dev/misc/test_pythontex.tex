@@ -1,0 +1,33 @@
+\documentclass{article}
+\usepackage{pythontex}
+
+\begin{document}
+
+\section{Running Python Code in LaTeX}
+
+Here is an example of running Python code and showing its output:
+
+% Define the function in a pycode block, so it can be reused
+\begin{pycode}
+def add(a, b):
+    return a + b
+\end{pycode}
+
+\begin{pycode}
+x = 5
+y = 10
+\end{pycode}
+\pyv{print(x + y)} \pyc{print(x + y)}
+
+% Show the verbatim code and run it within the pyverbatim environment
+\begin{pyverbatim}
+def add(a, b):
+    return a + b
+result = add(2, 3)
+print(f"The sum is {result}")
+\end{pyverbatim}
+
+% Use the function in an inline Python code block
+The sum is: \py{add(2, 3)}
+
+\end{document}

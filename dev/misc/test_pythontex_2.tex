@@ -1,0 +1,32 @@
+\documentclass{article}
+\usepackage{pythontex}
+
+\begin{document}
+
+\section{Running Python Code with Selective Terminal Output}
+
+\begin{pyverbatim}
+def add(a, b):
+    return a + b
+\end{pyverbatim}
+
+\begin{pycode}
+# Define the function globally
+def add(a, b):
+    return a + b
+\end{pycode}
+    
+% Use pycode to evaluate the result
+\begin{pycode}
+result = add(2, 3)
+\end{pycode}
+
+% Now, we can print the result in a pyconsole block
+\begin{pyconsole}
+result
+\end{pyconsole}
+
+% Inline output for convenience
+The sum is: \py{result}
+
+\end{document}
