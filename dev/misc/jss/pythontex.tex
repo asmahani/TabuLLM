@@ -64,10 +64,17 @@ intuitive interface. Below, we demonstrate the usage of its main function
 
 \subsection{Simple Function Example}
 
-\begin{pyverbatim}
-def add_numbers(a, b):
-    return a + b
-\end{pyverbatim}
+\begin{pyblock}
+import os
+from openai import OpenAI
+from dotenv import load_dotenv
+load_dotenv()
+openai_api_key = os.getenv('OPENAI_API_KEY')
+client = OpenAI(api_key=openai_api_key)
+#print(f'openai api key: {openai_api_key}')
+print(f'placeholder for code')
+\end{pyblock}
+\stdoutpythontex % \ printpythontex
 
 
 %% -- Conclusion ---------------------------------------------------------------
