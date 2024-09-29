@@ -102,6 +102,7 @@ Advanced topics:
   \item Alternative handling of multiple text columns
   \item Chaining the \code{TextColumnTransformer} and \code{SphericalKMeans} classes in a predictive pipeline
   \item Further compressing the embedding vectors into a single feature using cross-validation / target encoding.
+  \item Matryoshka embeddings
 \end{itemize}
 
 \section[Using TabuLLM]{Using \pkg{TabuLLM}}\label{sec:usage}
@@ -168,8 +169,29 @@ To use Google's embedding models, we must have a valid Google Cloud Platform acc
 \begin{pyblock}
 google_project_id = os.getenv('VERTEXAI_PROJECT')
 google_location = os.getenv('VERTEXAI_LOCATION')
+#print(f"Google project id: {google_project_id}, location: {google_location}")
 \end{pyblock}
 %\stdoutpythontex % \ printpythontex
+
+As with OpenAI, the \code{model} parameter can also be passed to override the default value of \code{text-embedding-004}. In addition, two more parameters can be set. First is \code{task} which dictates the type of embedding task used - by Google - to fine-tune model. The default value is \code{SEMANTIC_SIMILARITY}. Second is \code{batch\_size} which specifies the number of text samples to be processed in each batch. The latter is due to a limit imposed by the Google Vertex API. Currently, the limit is 250 samples per batch for the \code{us-central1} region, and 5 elsewhere.
+
+\begin{pyblock}
+obj = TextColumnTransformer(
+    model_type = 'google'
+    , google_args = {
+        'project_id': google_project_id
+        , 'location': google_location
+        , 'model': 'text-embedding-004'
+        , 'task': 'SEMANTIC_SIMILARITY'
+        , 'batch_size': 250
+    }
+)
+#X = obj.fit_transform(df.loc[:5, ['diagnoses']])
+#print(X.shape)
+\end{pyblock}
+%\stdoutpythontex % \ printpythontex
+
+We see that the Google embedding model returns a vector of length 768.
 
 \subsubsection{Sentence Transformers}\label{subsubsec:using-embed-st}
 
