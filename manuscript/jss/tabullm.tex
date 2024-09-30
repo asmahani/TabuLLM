@@ -195,13 +195,44 @@ We see that the Google embedding model returns a vector of length 768.
 
 \subsubsection{Sentence Transformers}\label{subsubsec:using-embed-st}
 
+Besides the commercial embedding models provided by OpenAI and Google, we can also use the open-source LLMs hosted on the Hugging Face platform. To do so, we must use \code{st} for \code{model\_type}, and pass the model name to the \code{st\_args} dictionary. The model name can be found by browsing to the model's homepage on Hugging Face. Below is an example call:
+\begin{pyblock}
+obj = TextColumnTransformer(
+    model_type = 'st'
+    , st_args = {
+        'model': 'sentence-transformers/all-MiniLM-L6-v2'
+    }
+)
+#X = obj.fit_transform(df.loc[:5, ['diagnoses']])
+#print(X.shape)
+\end{pyblock}
+%\stdoutpythontex % \ printpythontex
+
+It is important to note that, unlike the case with OpenAI and Google where inference (text embedding, to be more precise) occurs in the cloud, \code{sentence-transformer} models are downloaded and run locally. This is especially important when using large models with many parameters, since they require relatively large space to store the network weights. Also, performing inference on these networks can be time consuming, unless using accelerators such as GPUs. (The above model, \code{sentence-transformers/all-MiniLM-L6-v2} was chosen specifically for this example since it is a distilled - very small - model.)
+
+An advantage of using sentence transformer models, in addition to being free to use, is that they can be customized for the specific needs of a problem. For instance, one can fine-tune these embedding models on data specific to the application domain. A thorough discussion of fine-tuning, however, is beyond the scope of this tutorial.
+
 \subsubsection{Doc2Vec}\label{subsubsec:using-embed-doc2vec}
+
+[add doc2vec description]
 
 \subsection[cluster Module]{\code{cluster} Module}\label{subsec:using-cluster}
 
 \subsection[explain Module]{\code{explain} Module}\label{subsec:using-explain}
 
 \subsection[Advanced Topics]{Advanced Topics}\label{subsec:using-advanced}
+
+\subsubsection[Multiple Text Columns]{Multiple Text Columns}\label{subsubsec:using-multiple-columns}
+
+When the first argument, \code{X}, supplied to the \code{fit} method of \code{TextColumnTransformer} is a DataFrame with multiple text columns, the default behavior is to concatenate the columns before embedding. This is done using the \code{colsep} argument, which defaults to the string `||'. Besides overriding this default value, users can also pre-combine the text columns before passing them to the \code{fit} method. For examples:
+\begin{pyblock}
+df['diagnoses_and_operations'] = 'Patient diagnoses: ' + df['diagnoses'] + \ 
+  ' || CPB procedures: ' + df['operations']
+print(df.loc[2, 'diagnoses_and_operations'])
+\end{pyblock}
+\stdoutpythontex % \ printpythontex
+
+Besides concatenation, it is also possible to embed each text column independently, and then concatenate the resulting embedding vectors. [we can provide example of how to construct a pipeline in scikit-learn]
 
 \section[Discussion]{Discussion} \label{sec:discussion}
 
