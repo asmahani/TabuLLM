@@ -152,8 +152,7 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
         self.return_cols_prefix = return_cols_prefix
         self.doc2vec_fit = None
     
-    def _fit_doc2vec(self, X, y = None):
-        args = self.doc2vec_args
+    def prep_X(self, X):
         if not (X.dtypes == 'object').all():
             raise TypeError('All columns of X must be of string (object) type')
         
@@ -161,6 +160,12 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
             lambda row: self.colsep.join([f'{col}: {row[col]}' for col in X.columns])
             , axis=1
         ).tolist()
+        return Xstr
+
+    def _fit_doc2vec(self, X, y = None):
+        Xstr = self.prep_X(X)
+        
+        args = self.doc2vec_args
         
         corpus = [TaggedDocument(words = simple_preprocess(doc), tags=[str(i)]) for i, doc in enumerate(Xstr)]
         alg = 1 if args['model'] == 'PV-DM' else 0
@@ -230,13 +235,7 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
             The transformed embeddings.
         """
         
-        if not (X.dtypes == 'object').all():
-            raise TypeError('All columns of X must be of string (object) type')
-        
-        Xstr = X.fillna('').astype(str).apply(
-            lambda row: self.colsep.join([f'{col}: {row[col]}' for col in X.columns])
-            , axis=1
-        ).tolist()
+        Xstr = self.prep_X(X)
         
         if self.model_type == 'openai':
             arr = self._transform_openai(Xstr)
