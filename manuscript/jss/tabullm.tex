@@ -53,15 +53,15 @@ The \pkg{TabuLLM} Python package provides various functionalities to support the
 \begin{enumerate}
   \item \textbf{Embed} - A unified interface for converting one or more text column(s) in the data to a numeric matrix, using commercial LLMs (OpenAI, Google Vertex AI), open-source LLMs (available on the Hugging Face model respository, and accessed via the sentence transformers package), as well as earlier-generation embedding methods such as Doc2Vec.
   \item \textbf{Cluster} - Python implementation of spherical k-means for clustering the embedding vectors produced by LLMs. Since embeddings only contain directional information and their magnitude is not meaningful, it is more appropriate to use spherical k-means, which replaces the Euclidean distance - used in standard k-means - with cosine distance.
-  \item \textbf{Explain} - 1) Prompt generation for soliciting descriptive labels for data clusters (such as those generated from the embedding vectors, as discussed above), 2) Wrapper for interacting with text-completion LLMs (currently: OpenAI and Google).
+  \item \textbf{Explain} - 1) Prompt generation for soliciting descriptive labels for data clusters (such as those generated from the embedding vectors, as discussed above), 2) Wrapper for submitting the prompt to text-completion LLMs and requesting structured-output (currently includes OpenAI and Google), 3) Utility function for comparing the average outcome in each cluster against the average in all other clusters to identify clusters that are significantly different from the rest with regards to the outcome variable.
 \end{enumerate}
-All three functionalities are implemented according to the scikit-learn API, so they can be used in predictive pipelines with other scikit-learn transformers and estimators.
+All three modules are implemented according to the scikit-learn API, so they can be used in predictive pipelines with other scikit-learn transformers and estimators.
 
 \section[TabuLLM Modules]{\pkg{TabuLLM} Modules}\label{sec:modules}
 
 \subsection[embed Module]{\code{embed} Module}\label{subsec:module-embed}
 
-The workhorse of this module is the \code{TextColumnTransformer} class, which implements scikit-learn's transformer interface, namely the \code{fit}, \code{transform} and \code{fit\_transform} methods. The most important argument to the class constructor is \code{model\_type}, which specifies the type of embedding algorithm to be used. As of this writing (September 2024), the available options are \code{openai}, \code{google}, \code{st} (open-source Hugging Face models accessed via the \code{sentence-transformers} package), and \code{doc2vec} - via the \code{gensim} Python package \citep{rehurek_lrec}. With the exception of \code{doc2vec}, the remaining models do not train on the data, which means the \code{fit} function is simply a pass-through for \code{openai}, \code{google} and \code{st}.
+The workhorse of this module is the \code{TextColumnTransformer} class, which implements scikit-learn's transformer interface, namely the \code{fit}, \code{transform} and \code{fit\_transform} methods. The most important argument to the class constructor is \code{model\_type}, which specifies the type of embedding algorithm to be used. As of this writing (September 2024), the available options are \code{openai}, \code{google}, \code{st} (open-source Hugging Face models accessed via the \code{sentence-transformers} package), and \code{doc2vec} - via the \code{gensim} Python package \citep{rehurek_lrec}. %With the exception of \code{doc2vec}, the remaining models do not train on the data, which means the \code{fit} function is simply a pass-through for \code{openai}, \code{google} and \code{st}.
 
 The class constructor also accepts dictionary arguments for each of the embedding models listed above, \code{openai\_args}, \code{google\_args}, \code{st\_args} and \code{doc2vec\_args}. For commercial models (OpenAI and Google), the dictionaries must included the necessary account credentials. For all models, the specific model name can be set in the dictionary. For example, as of this writing, the embedding models offered by OpenAI are \code{text-embedding-3-small}, \code{text-embedding-3-large} and \code{text-embedding-ada-002}. See Section \ref{subsec:using-embed} for further details.
 
@@ -73,7 +73,9 @@ Correspondingly, the \code{transform} method returns a pandas DataFrame with the
 
 Modern embedding LLMs produce high-dimensional vectors, which can pose multiple challenges for predictive models. First, the high dimensionality can lead to overfitting, especially when the number of observations is small relative to the number of features. Second, the high dimensionality can make it difficult to interpret the model, as it is hard to visualize or understand the relationships between the features. Third, the high dimensionality can make it computationally expensive to train the model. To address these challenges, it is often necessary to reduce the dimensionality of the embedding vectors before using them as features in a predictive model.
 
-While different approaches to dimensionality reduction are available, with Principal Components Analysis (PCA) being the most common, clustering can be a more effective approach for embedding vectors. This is due to the fact that embeddings only contain directional information and their magnitude is not meaningful and thus project methods such as PCA can distort the relationships between the vectors. Clustering, on the other hand, can group similar vectors together without distorting the relationships between them. In particular, spherical k-means is a clustering algorithm that replaces the Euclidean distance - used in standard k-means - with cosine distance, which is more appropriate for normalized vectors.
+[discuss Matryoshka embeddings here]
+
+While different approaches to dimensionality reduction are available, with Principal Components Analysis (PCA) being the most common, clustering can be a more effective approach for embedding vectors. This is due to the fact that embeddings only contain directional information and their magnitude is not meaningful and thus projection methods such as PCA can distort the relationships between the vectors. Clustering, on the other hand, can group similar vectors together without distorting the relationships between them. In particular, spherical k-means is a clustering algorithm that replaces the Euclidean distance - used in standard k-means - with cosine distance, which is more appropriate for normalized vectors.
 
 The \code{SphericalKMeans} class in the \code{cluster} module implements spherical k-means in consistency with scikit-learn's estimator interface. The parameters passed to the class constructor are similar to those of scikit-learn's \code{KMeans} class, e.g. allowing the user to specify the number of clusters to generate (\code{n\_clusters}), the maximum number of iterations (\code{max\_iter}), and the number of initializations to perform (\code{n\_init}). A few points are worth highlighting about the \code{SphericalKMeans} class:
 \begin{itemize}
@@ -88,7 +90,7 @@ Clustering also enhances interpretability by grouping similar data points togeth
 
 \subsection[explain Module]{\code{explain} Module}\label{subsec:module-explain}
 
-The core idea here is to use text-generating large language models to provide descriptive labels for the clusters generated by the \code{SphericalKMeans} class using the embedding vectors. Since the embedding vectors are, in turn, produced by embedding LLMs, we refer to this explanation process as (text-generating) `AI explaining AI' (embedding).
+The core idea here is to use text-generating large language models to provide descriptive labels for the clusters generated by applying \code{SphericalKMeans} to the embedding vectors. Since the embedding vectors are themselves produced by embedding LLMs, we refer to this explanation process as (text-generating) `AI explaining AI' (embedding).
 
 The \code{explain} module of \pkg{TabuLLM} provides three functions to support this process: \code{generate_prompt}, \code{generate_response} and \code{one_vs_rest}:
 \begin{itemize}
@@ -107,11 +109,11 @@ Advanced topics:
 
 \section[Using TabuLLM]{Using \pkg{TabuLLM}}\label{sec:usage}
 
-In this section, we demonstrate the use of \pkg{TabuLLM} modules through a series of examples, all using a dataset of pediatric cardiac surgery patients.
+In this section, we demonstrate the use of \pkg{TabuLLM} modules through a series of examples, using a dataset of pediatric cardiac surgery patients.
 
 \subsection{Dataset}\label{subsec:using-dataset}
 
-The data is an excerpt from that introduced in \cite{sharabiani2024genai}, collected during 2019-2021 from pediatric CPB surgeries in the UK. Columns included:
+The data is an excerpt from the one introduced in \cite{sharabiani2024genai}, collected from pediatric CPB surgeries in the UK during 2019-2021. Columns included:
 \begin{itemize}
   \item \code{is\_female}: Patient gender (0: male, 1: female).
   \item \texttt{age}: Patient's age at the time of operation (years).
@@ -120,7 +122,7 @@ The data is an excerpt from that introduced in \cite{sharabiani2024genai}, colle
   \item \code{optime}: Duration of operation (minutes).
   \item \code{diagnoses}: An ordered collection of medical diagnosis codes for the patient (starting with the primary diagnosis), each including a numeric value followed by a text description of the code. Multiple codes are separated by semicolons.
   \item \code{operations}: Similar to \code{diagnoses}, but representing the procedures performed on the patient during CPB.
-  \item \code{aki\_severity}: The outcome variable, severity of postoperative acute kidney injury (AKI). This is a binarized version of the KDIGO score \citep{eknoyan2013kdigo} that can take the values 0, 1, 2, 3. The severity score is 0 if the original score is 0 or 1, and 1 if the original score is 2 or 3.
+  \item \code{aki\_severity}: The outcome variable, representing severity of postoperative acute kidney injury (AKI). This is a binarized version of the ordinal KDIGO score \citep{eknoyan2013kdigo}.
 \end{itemize}
 We will be using the \code{diagnoses} and \code{operations} columns for text embedding. We begin by loading the data and printing examples of the text columns:
 \begin{pyblock}
@@ -131,13 +133,13 @@ print(f"Example of operations:\n{df['operations'][2]}\n")
 \end{pyblock}
 \stdoutpythontex % \ printpythontex
 
-We can see that each cell in the \code{diagnoses} and \code{operations} columns contains a concatenated list of medical codes, each followed by a description. The order of entry for the codes is medically relevant, with primary codes - diagnosis or operation - included first. %Descriptions are standardized, which allows us to use simpler methods for encoding the text, such as 'bag-of-codes' where each code is represented by a binary feature, and thus each observation is represented by a vector of binary values.
+We can see that each cell in the \code{diagnoses} and \code{operations} columns contains a concatenated list of medical codes, each consisting of a number followed by a description. The order of entry for the codes is medically relevant, with primary codes - diagnosis or operation - coming first. %Descriptions are standardized, which allows us to use simpler methods for encoding the text, such as 'bag-of-codes' where each code is represented by a binary feature, and thus each observation is represented by a vector of binary values.
 
 \subsection[embed Module]{\code{embed} Module}\label{subsec:using-embed}
 
 \subsubsection{OpenAI}\label{subsubsec:using-embed-openai}
 
-To use the OpenAI embedding models, we must create an OpenAI client object using a valid API key. As illustrated below, it is recommended to store the API key in a secure location, such as a .env file, and load it using the \code{dotenv} package:
+To use the OpenAI embedding models, we must create an OpenAI client object using a valid API key. It is recommended to store the API key in a secure location, such as a .env file, and load it using the \code{dotenv} package:
 \begin{pyblock}
 import os
 from openai import OpenAI
@@ -146,7 +148,7 @@ load_dotenv()
 openai_api_key = os.getenv('OPENAI_API_KEY')
 client = OpenAI(api_key=openai_api_key)
 \end{pyblock}
-We can now instantiate and use \code{TextColumnTransformer}. (NOTE: Running the following code would call OpenAI's embedding model and thus incur a small cost.)
+We can now instantiate and use \code{TextColumnTransformer}. (NOTE: Running the following code would call OpenAI's embedding model and incur a small cost.)
 \begin{pyblock}
 from TabuLLM.embed import TextColumnTransformer
 obj = TextColumnTransformer(
@@ -169,11 +171,10 @@ To use Google's embedding models, we must have a valid Google Cloud Platform acc
 \begin{pyblock}
 google_project_id = os.getenv('VERTEXAI_PROJECT')
 google_location = os.getenv('VERTEXAI_LOCATION')
-#print(f"Google project id: {google_project_id}, location: {google_location}")
 \end{pyblock}
-%\stdoutpythontex % \ printpythontex
 
-As with OpenAI, the \code{model} parameter can also be passed to override the default value of \code{text-embedding-004}. In addition, two more parameters can be set. First is \code{task} which dictates the type of embedding task used - by Google - to fine-tune model. The default value is \code{SEMANTIC_SIMILARITY}. Second is \code{batch\_size} which specifies the number of text samples to be processed in each batch. The latter is due to a limit imposed by the Google Vertex API. Currently, the limit is 250 samples per batch for the \code{us-central1} region, and 5 elsewhere.
+As with OpenAI, the \code{model} parameter can also be passed to override the default value of \code{text-embedding-004}. In addition, two more parameters can be set. First is \code{task} which dictates the type of embedding task used - by Google - to fine-tune model. The default value is \code{SEMANTIC_SIMILARITY}. (See \href{https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/task-types}{Choose an Embeddings Task Type}.) Second is \code{batch\_size} which specifies the number of text samples to be processed in each batch. This limit is imposed by the Google Vertex API, and currently is 250 samples per batch for the \code{us-central1} region, and 5 elsewhere.
+
 
 \begin{pyblock}
 obj = TextColumnTransformer(
@@ -195,7 +196,7 @@ We see that the Google embedding model returns a vector of length 768.
 
 \subsubsection{Sentence Transformers}\label{subsubsec:using-embed-st}
 
-Besides the commercial embedding models provided by OpenAI and Google, we can also use the open-source LLMs hosted on the Hugging Face platform. To do so, we must use \code{st} for \code{model\_type}, and pass the model name to the \code{st\_args} dictionary. The model name can be found by browsing to the model's homepage on Hugging Face. Below is an example call:
+Besides the commercial embedding models provided by OpenAI and Google, we can also use the open-source LLMs available from the Hugging Face online repository. To do so, we must set \code{model\_type} to \code{st}, and pass the model name to the \code{st\_args} dictionary. The model name can be found by browsing to the model's homepage on Hugging Face. Below is an example:
 \begin{pyblock}
 obj = TextColumnTransformer(
     model_type = 'st'
@@ -208,7 +209,7 @@ print(X.shape)
 \end{pyblock}
 \stdoutpythontex % \ printpythontex
 
-It is important to note that, unlike the case with OpenAI and Google where inference (text embedding, to be more precise) occurs in the cloud, \code{sentence-transformer} models are downloaded and run locally. This is especially important when using large models with many parameters, since they require relatively large space to store the network weights. Also, performing inference on these networks can be time consuming, unless using accelerators such as GPUs. (The above model, \code{sentence-transformers/all-MiniLM-L6-v2} was chosen specifically for this example since it is a distilled - very small - model.)
+It is important to note that, unlike the case with OpenAI and Google where text embedding occurs in the cloud, \code{sentence-transformer} models are downloaded and run locally. This is especially important when using large models with many parameters, since they require relatively large space to store the network weights. Also, performing inference with these large models can be time consuming, unless using GPUs or other accelerators. (The above model, \code{all-MiniLM-L6-v2}, was specifically chosen due to its very small size.)
 
 An advantage of using sentence transformer models, in addition to being free to use, is that they can be customized for the specific needs of a problem. For instance, one can fine-tune these embedding models on data specific to the application domain. A thorough discussion of fine-tuning, however, is beyond the scope of this tutorial.
 
@@ -218,7 +219,7 @@ An advantage of using sentence transformer models, in addition to being free to 
 
 \subsection[cluster Module]{\code{cluster} Module}\label{subsec:using-cluster}
 
-We can now use the embedding vectors produced by the LLMs to cluster the data. We will use the \code{SphericalKMeans} class to cluster the data into 10 groups. The following code demonstrates this:
+We can now cluster the data points using the embedding vectors produced by the LLMs. We will use the \code{SphericalKMeans} class to cluster the data into 10 groups. The following code demonstrates this:
 \begin{pyblock}
 from TabuLLM.cluster import SphericalKMeans
 cluster = SphericalKMeans(n_clusters=10, n_init=5)
