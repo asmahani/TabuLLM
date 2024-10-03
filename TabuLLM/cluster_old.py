@@ -29,7 +29,7 @@ def _skmeans_lloyd_update(
 
 class SphericalKMeans(BaseEstimator, ClusterMixin):
     """
-    Spherical K-Means clustering algorithm with an option to return hard labels or similarity matrix.
+    Spherical K-Means clustering algorithm.
     
     Parameters
     ----------
@@ -43,8 +43,6 @@ class SphericalKMeans(BaseEstimator, ClusterMixin):
         Relative tolerance with regards to inertia to declare convergence.
     random_state : int, RandomState instance or None, default=None
         Determines random number generation for centroid initialization.
-    return_hard_labels : bool, default=False
-        If True, `transform` method returns hard labels (cluster assignments). If False, it returns the similarity matrix (soft labels).
         
     Attributes
     ----------
@@ -59,14 +57,13 @@ class SphericalKMeans(BaseEstimator, ClusterMixin):
     similarity_matrix : array, shape (n_samples, n_clusters)
         Similarity matrix between samples and cluster centers.
     """
-    def __init__(self, n_clusters=3, n_init=10, max_iter=300, tol=1e-4, random_state=None, return_hard_labels=False):
+    def __init__(self, n_clusters=3, n_init=10, max_iter=300, tol=1e-4, random_state=None):
         self.n_clusters = n_clusters
         self.max_iter = max_iter
         self.tol = tol
         self.random_state = random_state
         self.n_init = n_init
         self.inertia_ = None
-        self.return_hard_labels = return_hard_labels  # New parameter to control the behavior of transform()
 
     def fit(self, X, y=None):
         """
@@ -86,12 +83,12 @@ class SphericalKMeans(BaseEstimator, ClusterMixin):
         """        
         X = check_array(X)
         X = self._normalize(X)
-        X_unique = np.unique(X, axis=0)
+        X_unique = np.unique(X, axis = 0)
         
         best_inertia = float('inf')
         best_centroids = None
         best_labels = None
-        best_similarities = None
+        best_simiarities = None
         random_state = check_random_state(self.random_state)
 
         for _ in range(self.n_init):
@@ -117,18 +114,18 @@ class SphericalKMeans(BaseEstimator, ClusterMixin):
                     iter_count = 0  # Reset iteration count
                     continue
 
-            inertia = np.sum(1 - np.max(similarities, axis=1))
+            inertia = np.sum(1 - np.max(similarities, axis = 1))
             if inertia < best_inertia:
                 best_inertia = inertia
                 best_centroids = centroids
                 best_labels = labels
-                best_similarities = similarities
+                best_simiarities = similarities
 
         # Set the best results
         self.cluster_centers_ = best_centroids
         self.labels_ = best_labels
         self.inertia_ = best_inertia
-        self.similarity_matrix = best_similarities
+        self.similarity_matrix = best_simiarities
         self.n_iter_ = iter_count
 
         return self
@@ -151,7 +148,7 @@ class SphericalKMeans(BaseEstimator, ClusterMixin):
     
     def transform(self, X):
         """
-        Transform X to a cluster-distance space or return hard labels based on `return_hard_labels`.
+        Transform X to a cluster-distance space.
 
         In the new space, each dimension is the cosine similarity to the cluster centers.
 
@@ -162,23 +159,17 @@ class SphericalKMeans(BaseEstimator, ClusterMixin):
 
         Returns
         -------
-        similarities : ndarray of shape (n_samples, n_clusters) or labels : ndarray of shape (n_samples,)
-            Transformed array of cosine similarities, or hard labels (cluster assignments).
+        similarities : ndarray of shape (n_samples, n_clusters)
+            Transformed array.
         """
         check_is_fitted(self, ['cluster_centers_'])
         X = check_array(X)
         X = self._normalize(X)
-        
-        if self.return_hard_labels:
-            tmp = self._assign_clusters(X, hard=True)
-            return np.reshape(tmp, (tmp.size, 1))
-            #return self._assign_clusters(X, hard=True)  # Return hard labels (cluster assignments)
-        else:
-            return self._assign_clusters(X, hard=False)  # Return soft labels (similarities)
-
+        return self._assign_clusters(X, hard=False)
+    
     def fit_transform(self, X, y=None):
         """
-        Compute clustering and transform X to cluster-distance space or hard labels based on `return_hard_labels`.
+        Compute clustering and transform X to cluster-distance space.
 
         Equivalent to calling fit(X) followed by transform(X).
 
@@ -189,11 +180,11 @@ class SphericalKMeans(BaseEstimator, ClusterMixin):
 
         Returns
         -------
-        similarities : ndarray of shape (n_samples, n_clusters) or labels : ndarray of shape (n_samples,)
-            Transformed array of cosine similarities, or hard labels (cluster assignments).
+        similarities : ndarray of shape (n_samples, n_clusters)
+            Transformed array.
         """
         self.fit(X, y)
-        return self.transform(X)
+        return self.similarity_matrix
 
     def predict(self, X):
         """
