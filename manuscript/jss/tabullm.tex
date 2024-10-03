@@ -357,7 +357,79 @@ Besides concatenation, it is also possible to embed each text column independent
 
 \subsubsection[Using TabuLLM in Predictive Pipelines]{Using \pkg{TabuLLM} in Predictive Pipelines}\label{subsubsec:using-predictive-pipelines}
 
+As mentioned earlier, \pkg{TabuLLM} is designed to be used in predictive pipelines with other scikit-learn transformers and estimators. In particular, the \code{TextColumnTransformer} class can be chained with the \code{SphericalKMeans} class to create a pipeline that first embeds the text columns, and then clusters the resulting vectors. The cluster distance matrix can then be used as features in a predictive model. Here we demonstrate how to construct such a pipeline. We make the example more tangible by illustrating the contribution of text columns to the predictive accuracy of a baseline model that includes only the non-text features.
+
+Let's begin by defining our baseline and text features as well as the outcome variable:
+\begin{pyblock}
+features_baseline = ['is_female', 'age', 'height', 'weight', 'optime']
+features_text = ['diagnoses', 'operations']
+X = df[features_baseline + features_text]
+y = df['aki_severity']
+\end{pyblock}
+
+The baseline pipeline consists of a column transformer that simply selects the baseline features from input data, followed by logistic regression:
+\begin{pyblock}
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LogisticRegression
+
+ct_baseline = ColumnTransformer([
+    ('baseline', 'passthrough', features_baseline)
+], remainder = 'drop')
+pipeline_baseline = Pipeline([
+    ('coltrans', ct_baseline)
+    , ('logit', LogisticRegression(penalty = None))
+])
+\end{pyblock}
+
+We can now use cross-validation to evaluate the predictive accuracy of the baseline model, using area under the ROC curve (AUC) as the evaluation metric:
+\begin{pyblock}
+from sklearn.model_selection import KFold, cross_val_score
+kf = KFold(n_splits = 50, shuffle = True, random_state = 1234)
+auc_baseline = cross_val_score(
+    pipeline_baseline
+    , X, y, cv = kf
+    , scoring = 'roc_auc'
+)
+print(f"Baseline AUC: {auc_baseline.mean():.3f}")
+\end{pyblock}
+\stdoutpythontex % \ printpythontex
+
+The alternative pipeline for utilizing text embeddings is more complex. The text columns are first embedded using the \code{TextColumnTransformer} class, and then clustered using the \code{SphericalKMeans} class. The cluster distance matrix is then combined back with the baseline features and passed to the logistic regression model. The following code demonstrates how to construct this pipeline and measure its predictive accuracy:
+\begin{pyverbatim}
+trans_embed = TextColumnTransformer(
+    model_type = 'st'
+)
+trans_cluster = SphericalKMeans(n_clusters=10, n_init=5)
+ct_text = Pipeline([
+    ('embed', trans_embed)
+    , ('cluster', trans_cluster)
+])
+ct_tabullm = ColumnTransformer([
+    ('text', ct_text, features_text)
+], remainder = 'passthrough')
+pipeline_tabullm = Pipeline([
+    ('coltrans', ct_tabullm)
+    , ('logit', LogisticRegression(penalty = None))
+])
+
+auc_tabullm = cross_val_score(
+    pipeline_tabullm
+    , X, y, cv = kf
+    , scoring = 'roc_auc'
+)
+auc_tabullm.mean()
+\end{pyverbatim}
+
 \section[Discussion]{Discussion} \label{sec:discussion}
+
+Topics:
+\begin{itemize}
+  \item \hl{Matryoshka embeddings}
+  \item \hl{Cross-validation / target encoding}
+  \item \hl{Fine-tuning sentence-transformer models}
+  \item \hl{Ensemble of LLMs}
+\end{itemize}
 
 \bibliography{tabullm}
 

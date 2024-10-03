@@ -167,7 +167,7 @@ class SphericalKMeans(BaseEstimator, ClusterMixin):
         X = self._normalize(X)
         return self._assign_clusters(X, hard=False)
     
-    def fit_transform(self, X):
+    def fit_transform(self, X, y=None):
         """
         Compute clustering and transform X to cluster-distance space.
 
@@ -183,7 +183,7 @@ class SphericalKMeans(BaseEstimator, ClusterMixin):
         similarities : ndarray of shape (n_samples, n_clusters)
             Transformed array.
         """
-        self.fit(X)
+        self.fit(X, y)
         return self.similarity_matrix
 
     def predict(self, X):
