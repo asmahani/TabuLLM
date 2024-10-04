@@ -109,6 +109,36 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
                 self.doc2vec_args['vector_size'] = 50
     
     def prep_X(self, X):
+        """
+        Preprocess the input DataFrame X by concatenating all column values into a single string for each row.
+        
+        This method converts all columns in the DataFrame to strings, fills any missing values with empty strings, 
+        and then concatenates the column values using the specified column separator (`self.colsep`). The resulting 
+        list of concatenated strings is returned.
+
+        Parameters
+        ----------
+        X : pandas.DataFrame
+            The input DataFrame containing the text columns to be transformed. All columns must be of string (object) type.
+
+        Returns
+        -------
+        list of str
+            A list of concatenated strings, where each string corresponds to a row in the DataFrame with the column values
+            separated by `self.colsep`.
+        
+        Raises
+        ------
+        TypeError
+            If any column in the input DataFrame is not of string (object) type.
+
+        Example
+        -------
+        >>> df = pd.DataFrame({'col1': ['hello', 'world'], 'col2': ['foo', 'bar']})
+        >>> transformer = TextColumnTransformer(colsep=' || ')
+        >>> transformer.prep_X(df)
+        ['col1: hello || col2: foo', 'col1: world || col2: bar']
+        """
         if not (X.dtypes == 'object').all():
             raise TypeError('All columns of X must be of string (object) type')
         
@@ -118,6 +148,30 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
         return Xstr
 
     def _fit_doc2vec(self, X, y=None):
+        """
+        Fit a Doc2Vec model on the preprocessed text data.
+
+        This method preprocesses the input DataFrame using `prep_X()` to concatenate text from all columns. 
+        It then constructs a corpus using the preprocessed text and fits a Doc2Vec model based on the parameters 
+        specified in `self.doc2vec_args`. The fitted Doc2Vec model is stored in `self.doc2vec_fit`.
+
+        Parameters
+        ----------
+        X : pandas.DataFrame
+            The input DataFrame containing text data to be transformed into embeddings.
+        y : Ignored
+            Not used, present for API consistency by convention.
+        
+        Returns
+        -------
+        self : object
+            The instance itself with the fitted Doc2Vec model stored in `self.doc2vec_fit`.
+
+        Raises
+        ------
+        ValueError
+            If an invalid `model` type is provided in `self.doc2vec_args`.
+        """
         Xstr = self.prep_X(X)
         args = self.doc2vec_args
         corpus = [TaggedDocument(words=simple_preprocess(doc), tags=[str(i)]) for i, doc in enumerate(Xstr)]
@@ -199,6 +253,19 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
         return pd.DataFrame(arr, columns=[self.return_cols_prefix + str(i) for i in range(arr.shape[1])])
 
     def _transform_google(self, X):
+        """
+        Transform each element of the input text list using Google Vertex AI's emebedding models.
+
+        Parameters
+        ----------
+        X : list of str
+            List of texts to be embedded into numeric vectors.
+        
+        Returns
+        -------
+        embeddings : numpy.ndarray
+            A 2D array, each row being an embedding vector corresponding to an element of X.
+        """
         args = self.google_args
         vertexai.init(project=args['project_id'], location=args['location'])
         model = TextEmbeddingModel.from_pretrained(args['model'])
@@ -212,13 +279,52 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
         return np.array([embedding.values for embedding in embeddings])
 
     def _transform_doc2vec(self, X):
+        """
+        Transform each element of the input text list using a fitted Doc2Vec embedding model.
+
+        Parameters
+        ----------
+        X : list of str
+            List of texts to be embedded into numeric vectors.
+        
+        Returns
+        -------
+        embeddings : numpy.ndarray
+            A 2D array, each row being an embedding vector corresponding to an element of X.
+        """
         return np.array([self.doc2vec_fit.infer_vector(simple_preprocess(doc)) for doc in X])
 
     def _transform_st(self, X):
+        """
+        Transform each element of the input text list using a sentence transformer model.
+
+        Parameters
+        ----------
+        X : list of str
+            List of texts to be embedded into numeric vectors.
+        
+        Returns
+        -------
+        embeddings : numpy.ndarray
+            A 2D array, each row being an embedding vector corresponding to an element of X.
+        """
         model = SentenceTransformer(self.st_args['model'])
         return model.encode(X)
 
     def _transform_openai(self, X):
+        """
+        Transform each element of the input text list using an OpenAI embedding model.
+
+        Parameters
+        ----------
+        X : list of str
+            List of texts to be embedded into numeric vectors.
+        
+        Returns
+        -------
+        embeddings : numpy.ndarray
+            A 2D array, each row being an embedding vector corresponding to an element of X.
+        """
         args = self.openai_args
         ret = args['client'].embeddings.create(input=X, model=args['model'])
         return np.array([ret.data[n].embedding for n in range(len(ret.data))])
