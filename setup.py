@@ -7,14 +7,15 @@ setup(
     install_requires=[
         # List your project's dependencies here, e.g.,
         'numpy'
-        , 'openai'
+        #, 'openai'
         , 'pandas'
         , 'scikit-learn'
         , 'scipy'
-        , 'sentence-transformers'
-        , 'gensim'
-        , 'vertexai'
+        #, 'sentence-transformers'
+        #, 'gensim'
+        #, 'vertexai'
         , 'pydantic'
+        , 'langchain'
     ],
     # Additional metadata about your package.
     author='Alireza S. Mahani',
