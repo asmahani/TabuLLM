@@ -33,61 +33,68 @@ pip install tabullm
 ## Quick Example
 
 ```python
-from tabullm import TextColumnTransformer, GMMFeatureExtractor, ClusterExplainer
+from tabullm import load_fraud, TextColumnTransformer, GMMFeatureExtractor, ClusterExplainer
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+
+# Load data
+X, y, metadata = load_fraud()
+text_cols = ['title', 'location', 'department', 'company_profile',
+             'description', 'requirements', 'benefits']
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, stratify=y, random_state=42
+)
 
 # Embed text columns
 embedding_model = HuggingFaceEmbeddings(
     model_name='sentence-transformers/all-MiniLM-L6-v2'
 )
-text_transformer = TextColumnTransformer(
-    model=embedding_model,
-    colnames={'title': 'Title', 'description': 'Description'}
-)
+text_transformer = TextColumnTransformer(model=embedding_model)
 
 # Build pipeline: Embed → Reduce → Classify
 pipeline = Pipeline([
     ('embed', text_transformer),
-    ('reduce', GMMFeatureExtractor(n_components=10)),
-    ('classify', RandomForestClassifier(n_estimators=100))
+    ('reduce', GMMFeatureExtractor(n_components=10, random_state=42)),
+    ('classify', RandomForestClassifier(n_estimators=100, random_state=42))
 ])
 
 # Fit and predict
-pipeline.fit(df[['title', 'description']], y)
-predictions = pipeline.predict(df_new[['title', 'description']])
+pipeline.fit(X_train[text_cols], y_train)
+y_pred = pipeline.predict_proba(X_test[text_cols])[:, 1]
 
 # Interpret clusters
 explainer = ClusterExplainer(
     llm=ChatOpenAI(model='gpt-4o-mini'),
     text_transformer=text_transformer,
     observations='job postings',
-    text_fields='titles and descriptions'
+    text_fields='title, location, department, company profile, '
+               'description, requirements, and benefits'
 )
 
 gmm = pipeline.named_steps['reduce']
 cluster_labels = gmm.labels_
 
 # Cluster descriptions only
-result_df = explainer.explain(df, cluster_labels)
+result_df = explainer.explain(X_train[text_cols], cluster_labels)
 
 # With outcome association + synthesis narrative
 result_df, global_stats, synthesis = explainer.explain(
-    df, cluster_labels,
-    y=y,
+    X_train[text_cols], cluster_labels,
+    y=y_train,
     y_label='fraudulent posting (1=fraud, 0=legitimate)',
     synthesize=True
 )
 
 # Include GMM cluster quality diagnostics in the association table
 obs_stats = gmm.assignment_confidence_stats(
-    pipeline.named_steps['embed'].transform(df)
+    pipeline.named_steps['embed'].transform(X_train[text_cols])
 )
 result_df, global_stats, stat_assoc_df, synthesis = explainer.explain(
-    df, cluster_labels,
-    y=y,
+    X_train[text_cols], cluster_labels,
+    y=y_train,
     y_label='fraudulent posting (1=fraud, 0=legitimate)',
     observation_stats=obs_stats,
     synthesize=True
