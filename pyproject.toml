@@ -32,3 +32,13 @@ dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0"
 ]
+examples = [
+    "jupyterlab>=4.0",
+    "ipykernel>=6.0",
+    "matplotlib>=3.7",
+    "python-dotenv>=1.0",
+    "sentence-transformers>=2.2",
+    "langchain-huggingface>=0.1",
+    "langchain-openai>=0.1",
+    "langchain-aws>=0.2",
+]
