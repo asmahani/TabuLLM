@@ -4,22 +4,16 @@
 """
 Clustering and feature extraction for text embeddings
 
-This module provides clustering algorithms optimized for text embeddings,
-including spherical k-means (cosine distance) and GMM-based feature extraction.
+This module provides GMM-based feature extraction optimized for text embeddings.
 
 Classes
 -------
-SphericalKMeans : Clustering with cosine distance for normalized embeddings
-GMMFeatureExtractor : Transform embeddings to Mahalanobis distances for ML pipelines
+GMMFeatureExtractor : Transform embeddings to per-cluster log-joint features for ML pipelines
 
 Examples
 --------
->>> from tabullm.cluster import SphericalKMeans, GMMFeatureExtractor
+>>> from tabullm.cluster import GMMFeatureExtractor
 >>> from sklearn.pipeline import Pipeline
->>>
->>> # Spherical k-means clustering
->>> kmeans = SphericalKMeans(n_clusters=5)
->>> labels = kmeans.fit_predict(embeddings)
 >>>
 >>> # GMM feature extraction in pipeline
 >>> pipeline = Pipeline([
@@ -29,7 +23,6 @@ Examples
 """
 
 # Cluster submodule exports
-from .spherical_kmeans import SphericalKMeans
 from .gmm_features import GMMFeatureExtractor
 
-__all__ = ['SphericalKMeans', 'GMMFeatureExtractor']
+__all__ = ['GMMFeatureExtractor']

@@ -7,7 +7,7 @@ packages = { find = { include = ["tabullm*"] } }
 
 [project]
 name = "tabullm"
-version = "1.1.0"
+version = "1.2.0"
 description = "Seamless Feature Extraction and Interpretation of Text Columns in Tabular Data Using Large Language Models"
 readme = "README.md"
 license = "MIT"

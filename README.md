@@ -19,8 +19,6 @@ pip install tabullm
 
 **GMMFeatureExtractor** - Extends sklearn's `GaussianMixture` with a `transform()` method that returns per-cluster log-joint features $\log p(\mathbf{x}, c_k)$ — the quantity the GMM maximises for hard assignment — enabling use in sklearn pipelines. An optional `include_log_density` parameter appends the marginal log-density as an explicit outlier score. A companion `assignment_confidence_stats()` method returns per-observation cluster quality diagnostics (`max_posterior`, `entropy`, `log_joint_margin`, `log_density`).
 
-**SphericalKMeans** - K-means clustering with cosine distance for L2-normalized embeddings. For normalized embeddings, mathematically equivalent to sklearn's `KMeans`. Available as an alternative hard-clustering option when GMM-based features are not needed.
-
 **ClusterExplainer** - Generates natural language cluster descriptions using LLMs with automatic recursive summarization that scales to arbitrarily large datasets. Supports:
 - Cost preview (`preview=True`) before LLM calls
 - Optional outcome-based statistical testing (`y`) to characterize which clusters associate with a target variable
@@ -101,6 +99,13 @@ result_df, global_stats, stat_assoc_df, synthesis = explainer.explain(
 )
 ```
 
+## Examples
+
+The [`examples/`](examples/) folder contains Jupyter notebooks demonstrating common workflows:
+
+- [`01_fraud_detection_walkthrough.ipynb`](examples/01_fraud_detection_walkthrough.ipynb) — core TabuLLM workflow on the fraud detection dataset: TF-IDF vs. LLM embeddings, GMM-based dimensionality reduction with cluster quality diagnostics, full `ClusterExplainer` usage (cost preview, outcome-based testing, per-observation diagnostics, narrative synthesis), and a predictive pipeline combining text and structured features
+- [`02_advanced_pipelines.ipynb`](examples/02_advanced_pipelines.ipynb) — advanced pipeline patterns: forward/backward column sweep to measure marginal contribution of each text column, and stacking ensembles (single-split and multi-split) that process column groups independently and combine predictions via a meta-learner
+
 ## Key Features
 
 - sklearn-compatible API (Pipeline, ColumnTransformer, GridSearchCV)
@@ -119,6 +124,8 @@ result_df, global_stats, stat_assoc_df, synthesis = explainer.explain(
 - Blind labeling: cluster descriptions generated without knowledge of outcome vector
 
 ## Release Notes
+
+**1.2.0** — Removed `SphericalKMeans` class. For L2-normalized embeddings, sklearn's `KMeans` is mathematically equivalent; `GMMFeatureExtractor` provides strictly richer features for pipeline use.
 
 **1.1.0** — Added multiple testing correction to `explain()` via the `correction` parameter (`'bonferroni'`, `'holm'`, `'fdr_bh'`). When set, a `P-value (adjusted)` column is appended to the per-cluster results and, when `observation_stats` is provided, to the stat-association table. Backward compatible: default is `None` (no correction).
 
