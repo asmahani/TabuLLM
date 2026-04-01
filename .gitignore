@@ -36,5 +36,8 @@ venv/
 # mypy
 .mypy_cache/
 
+# Jupyter
+.ipynb_checkpoints/
+
 # Cached data
 *.pkl

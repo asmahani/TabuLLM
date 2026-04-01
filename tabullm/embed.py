@@ -16,7 +16,7 @@ import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 from sklearn.preprocessing import normalize as sklearn_normalize
-from langchain.embeddings.base import Embeddings
+from langchain_core.embeddings import Embeddings
 
 
 class TextColumnTransformer(BaseEstimator, TransformerMixin):
@@ -76,7 +76,7 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
     def _validate_and_prepare_args(self):
         # Validate model
         if not isinstance(self.model, Embeddings):
-            raise TypeError('model must be an instance of langchain.embeddings.base.Embeddings')
+            raise TypeError('model must be an instance of langchain_core.embeddings.Embeddings')
 
         # Validate colsep
         if not isinstance(self.colsep, str):

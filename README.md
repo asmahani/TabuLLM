@@ -125,17 +125,7 @@ The [`examples/`](examples/) folder contains Jupyter notebooks demonstrating com
 
 ## Release Notes
 
-**1.2.0** — Removed `SphericalKMeans` class. For L2-normalized embeddings, sklearn's `KMeans` is mathematically equivalent; `GMMFeatureExtractor` provides strictly richer features for pipeline use.
-
-**1.1.0** — Added multiple testing correction to `explain()` via the `correction` parameter (`'bonferroni'`, `'holm'`, `'fdr_bh'`). When set, a `P-value (adjusted)` column is appended to the per-cluster results and, when `observation_stats` is provided, to the stat-association table. Backward compatible: default is `None` (no correction).
-
-**1.0.3** — Fixed broken package installation (1.0.2 wheel was published without Python source files).
-
-**1.0.2** — Fixed `__version__` mismatch; aligned `__init__.py` with `pyproject.toml`.
-
-**1.0.1** — Switched fraud dataset download from Kaggle to Zenodo (no credentials required).
-
-**1.0.0** — Initial release.
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## Citation
 
