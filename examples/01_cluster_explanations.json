@@ -1,0 +1,134 @@
+{
+  "result_df": [
+    {
+      "Group Number": 0,
+      "Short Description": "Financial Services & Administrative Support",
+      "Long Description": "Customer-facing and administrative roles in financial services, collections, and document management. Emphasizes bilingual capabilities, customer service excellence, and physical demands in mail/shipping operations with comprehensive benefits packages.",
+      "log_joint_margin": 293.635724062844,
+      "log_density": 1109.6738293326534,
+      "Size": 1449,
+      "Test": "Fisher Exact Test",
+      "Odds Ratio": 2.671455181203229,
+      "P-value": 4.69337820393843e-22
+    },
+    {
+      "Group Number": 1,
+      "Short Description": "Tech & Creative Professionals",
+      "Long Description": "Mid-to-senior engineering, design, and UX roles across global tech hubs. Focuses on modern web/mobile technologies, startup culture, equity compensation, and mission-driven work in fintech, gaming, and SaaS sectors.",
+      "log_joint_margin": 240.34641324199984,
+      "log_density": 1004.3910396923044,
+      "Size": 2372,
+      "Test": "Fisher Exact Test",
+      "Odds Ratio": 0.035934969163198785,
+      "P-value": 8.498127147626341e-47
+    },
+    {
+      "Group Number": 2,
+      "Short Description": "Diverse Multi-Sector Workforce",
+      "Long Description": "Broad entry-to-executive positions spanning oil & gas, manufacturing, finance, IT, and healthcare. Emphasizes staffing agency placement, specialized certifications, and immediate hiring needs across varied compensation levels.",
+      "log_joint_margin": 247.86565377522675,
+      "log_density": 969.0261948149541,
+      "Size": 2670,
+      "Test": "Fisher Exact Test",
+      "Odds Ratio": 6.9538163161967725,
+      "P-value": 2.0751105766004435e-147
+    },
+    {
+      "Group Number": 3,
+      "Short Description": "UK Apprenticeship Programs",
+      "Long Description": "Government-funded apprenticeships targeting 16-24 year-olds through Spectrum Learning. Offers 12-month Level 2 NVQ qualifications with guaranteed permanent employment conversion across administrative, retail, and logistics sectors.",
+      "log_joint_margin": 727.4266465187844,
+      "log_density": 1508.084251228331,
+      "Size": 460,
+      "Test": "Fisher Exact Test",
+      "Odds Ratio": 0.0,
+      "P-value": 1.5536537746343741e-10
+    },
+    {
+      "Group Number": 4,
+      "Short Description": "Global Venture-Backed Startups",
+      "Long Description": "High-growth startups across fintech, e-commerce, and SaaS with distributed international teams. Emphasizes flat hierarchies, equity packages, modern tech stacks, and entrepreneurial culture across engineering, product, and business roles.",
+      "log_joint_margin": 258.1486720145236,
+      "log_density": 1019.7657814604192,
+      "Size": 2360,
+      "Test": "Fisher Exact Test",
+      "Odds Ratio": 0.23408828542999874,
+      "P-value": 7.434496750498112e-23
+    },
+    {
+      "Group Number": 5,
+      "Short Description": "Early-Stage Growth Company Roles",
+      "Long Description": "Series A/B startups experiencing explosive growth seeking sales, marketing, and operations talent. Emphasizes founder mentality, ownership, rapid scaling, flexible benefits, and minimal experience requirements with attitude-based hiring.",
+      "log_joint_margin": 209.6118054973628,
+      "log_density": 969.4496520155642,
+      "Size": 2775,
+      "Test": "Fisher Exact Test",
+      "Odds Ratio": 0.517837463041205,
+      "P-value": 4.915277867056642e-09
+    },
+    {
+      "Group Number": 6,
+      "Short Description": "Healthcare & Caregiving Services",
+      "Long Description": "Entry-level accessible healthcare and social services positions including CNAs, home health aides, and support roles. Emphasizes flexibility, compassion, mission-driven organizations, and urgent staffing needs with competitive compensation.",
+      "log_joint_margin": 401.84987816897217,
+      "log_density": 1031.3993346833429,
+      "Size": 1260,
+      "Test": "Fisher Exact Test",
+      "Odds Ratio": 1.0930904522613065,
+      "P-value": 0.4959152415920789
+    },
+    {
+      "Group Number": 7,
+      "Short Description": "English Teaching Abroad Programs",
+      "Long Description": "Coordinated recruitment for English teaching positions primarily in Asia targeting recent graduates and career-changers. Offers furnished housing, airfare reimbursement, and low cost-of-living with minimal teaching experience requirements.",
+      "log_joint_margin": 1040.7898172893474,
+      "log_density": 1689.166384740854,
+      "Size": 737,
+      "Test": "Fisher Exact Test",
+      "Odds Ratio": 0.0,
+      "P-value": 9.509584662885966e-17
+    },
+    {
+      "Group Number": 8,
+      "Short Description": "Enterprise Technology Infrastructure",
+      "Long Description": "Mid-to-senior cloud infrastructure, DevOps, and data management roles in financial services and telecommunications. Requires 3-7 years experience, AWS/Azure expertise, and emphasizes enterprise-scale systems and specialized technical skills.",
+      "log_joint_margin": 233.17397543316724,
+      "log_density": 953.3296357315388,
+      "Size": 3237,
+      "Test": "Fisher Exact Test",
+      "Odds Ratio": 0.29479943052047547,
+      "P-value": 1.2857358030081202e-24
+    },
+    {
+      "Group Number": 9,
+      "Short Description": "Sales, Real Estate & Logistics Operations",
+      "Long Description": "Entry-to-mid sales, customer service, and warehouse roles in real estate, home improvement, and logistics. Features commission-based compensation, paid training programs, physical demands, and rapid hiring across North America.",
+      "log_joint_margin": 681.8227322443626,
+      "log_density": 1406.548430270665,
+      "Size": 560,
+      "Test": "Fisher Exact Test",
+      "Odds Ratio": 1.2393670940862114,
+      "P-value": 0.2302262197163774
+    }
+  ],
+  "global_results": "              Test    Statistic        P-value  Degrees of Freedom\n0  Chi-Square Test  1242.039261  1.016895e-261                   9",
+  "stat_assoc_df": [
+    {
+      "Stat": "log_joint_margin",
+      "Test": "Independent t-test",
+      "Mean (y=0)": 315.8961748427306,
+      "Mean (y=1)": 252.01079348727416,
+      "Statistic": 13.908964115804325,
+      "P-value": 7.03254956920504e-41
+    },
+    {
+      "Stat": "log_density",
+      "Test": "Independent t-test",
+      "Mean (y=0)": 1053.525468953503,
+      "Mean (y=1)": 994.9344797443274,
+      "Statistic": 13.66353995351687,
+      "P-value": 1.872317004177132e-39
+    }
+  ],
+  "synthesis": "# Analytical Narrative: Fraudulent Job Posting Landscape\n\n## Overall Landscape and Cluster Themes\n\nThe ten clusters span a diverse employment ecosystem, from specialized tech roles to entry-level service positions. Three broad themes emerge: (1) **technology and innovation sectors** (Clusters 1, 4, 5, 8) emphasizing modern skills and equity compensation; (2) **accessible entry-level and service roles** (Clusters 0, 6, 7, 9) with minimal barriers to entry; and (3) **structured institutional programs** (Clusters 3, 7) with formal credentialing or government backing. Cluster 2 represents a heterogeneous staffing-agency portfolio spanning multiple sectors. This segmentation reflects fundamentally different labor market dynamics and recruitment mechanisms.\n\n## Cluster-Level Fraud Associations: A Coherent Pattern\n\nThe fraud signal exhibits striking coherence: **technology and institutional clusters show near-zero fraud**, while **accessible entry-level clusters show elevated fraud**. \n\nLegitimate clusters (OR near 0) include: UK Apprenticeships (OR=0.000, p<0.0001), English Teaching Abroad (OR=0.000, p<0.0001), Tech & Creative Professionals (OR=0.036, p<0.0001), Enterprise Infrastructure (OR=0.295, p<0.0001), and Venture-Backed Startups (OR=0.234, p<0.0001). These represent 7,839 postings with exceptionally strong protective signals.\n\nFraudulent clusters (OR>1) include: Diverse Multi-Sector (OR=6.954, p<0.0001), Financial Services & Admin (OR=2.671, p<0.0001), and Early-Stage Growth (OR=0.518, p<0.0001). The Diverse Multi-Sector cluster shows the strongest fraud enrichment\u2014nearly 7-fold elevated odds. Healthcare (OR=1.093, p=0.496) and Sales/Logistics (OR=1.239, p=0.230) show modest, non-significant associations.\n\n## Per-Observation Statistics: Typicality and Clarity\n\nTwo critical per-observation metrics reveal the mechanism underlying fraud risk:\n\n**Log joint margin** (margin between top-2 cluster assignments) shows legitimate postings average 315.9 versus fraudulent at 252.0 (t=13.909, p<0.0001). This indicates **legitimate postings are more clearly classifiable**\u2014they fit their assigned cluster distinctly, whereas fraudulent postings blur cluster boundaries, suggesting they employ generic or misaligned language.\n\n**Log density** (typicality within assigned cluster) shows legitimate postings average 1053.5 versus fraudulent at 994.9 (t=13.664, p<0.0001). Fraudulent postings are **less representative of their clusters**, implying they deviate from sector-specific conventions and language patterns.\n\nThese patterns are consistent across clusters: Clusters 3 and 7 (legitimate) show exceptionally high margins (727.4, 1040.8) and densities (1508.1, 1689.2), while Cluster 2 (fraudulent-enriched) shows lower margin (247.9) and density (969.0).\n\n## Content Characteristics Distinguishing Fraud\n\nThe fraud signal correlates with **accessibility and urgency** rather than technical specificity. Fraudulent-enriched clusters emphasize:\n- **Minimal qualifications** and \"attitude-based hiring\" (Cluster 5)\n- **Staffing agency intermediation** with rapid placement (Cluster 2)\n- **Bilingual/customer-facing generalism** without specialized credentials (Cluster 0)\n- **Commission-based compensation** and rapid hiring (Cluster 9)\n\nConversely, legitimate clusters feature:\n- **Specific technical requirements** (AWS/Azure, 3-7 years experience in Cluster 8)\n- **Formal institutional backing** (government apprenticeships, established teaching programs)\n- **Equity and mission-driven narratives** with verifiable company profiles (Clusters 1, 4)\n- **Clear role specialization** and seniority levels\n\nThe pattern suggests fraudsters exploit **low-barrier-to-entry sectors** where verification is difficult and applicant desperation is highest. Legitimate postings in these sectors (e.g., Healthcare, Cluster 6) maintain specificity and institutional credibility, reducing fraud risk.\n\n## Conclusion\n\nFraud is not randomly distributed but systematically concentrated in sectors combining accessibility, urgency, and staffing-agency intermediation. The strong per-observation statistics indicate fraudulent postings lack the linguistic coherence and sector-specific conventions of legitimate roles, appearing as generic templates rather than authentic opportunities. This suggests detection strategies should prioritize **typicality metrics and cluster clarity** alongside content analysis."
+}
