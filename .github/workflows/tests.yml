@@ -17,15 +17,11 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.11", "3.13"]
-        langchain_line:
+        langchain_core_line:
           - label: "1.1"
-            langchain: "1.1"
             langchain_core: "1.1"
-            langchain_community: "0.4"
           - label: "1.2"
-            langchain: "1.2"
             langchain_core: "1.2"
-            langchain_community: "0.4"
 
     steps:
       - uses: actions/checkout@v4
@@ -38,12 +34,10 @@ jobs:
       - name: Install package with dev dependencies
         run: pip install .[dev]
 
-      - name: Install LangChain compatibility target
+      - name: Install LangChain core compatibility target
         run: >
           pip install
-          "langchain==${{ matrix.langchain_line.langchain }}.*"
-          "langchain-core==${{ matrix.langchain_line.langchain_core }}.*"
-          "langchain-community==${{ matrix.langchain_line.langchain_community }}.*"
+          "langchain-core==${{ matrix.langchain_core_line.langchain_core }}.*"
 
       - name: Run tests
         run: pytest tests/ --tb=short --cov=tabullm --cov-report=xml
