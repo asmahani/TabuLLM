@@ -2,6 +2,12 @@
 
 All notable changes to TabuLLM are documented here.
 
+## [1.3.0]
+
+- Tightened the supported runtime window for the LangChain stack to the tested 1.1.x-1.2.x series, with matching caps on `numpy`, `scipy`, `scikit-learn`, and `pydantic`.
+- Expanded CI to run the test suite across multiple LangChain minor lines and updated tests to use `langchain_core.embeddings.Embeddings` directly instead of the legacy compatibility shim.
+- Added weekly Dependabot checks for Python dependencies and GitHub Actions so upstream changes surface as reviewable PRs before they reach users.
+
 ## [1.2.1]
 
 - Fixed deprecated LangChain import in `embed.py` (`langchain.embeddings.base` → `langchain_core.embeddings`).
