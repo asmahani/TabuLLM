@@ -4,10 +4,12 @@ All notable changes to TabuLLM are documented here.
 
 ## [1.3.0]
 
+- Added README badges for CI, coverage, PyPI version, supported Python versions, and license, and enabled Codecov uploads from the test workflow.
 - Reduced the core runtime dependency surface to `langchain-core`; direct `langchain` and `langchain-community` requirements were dropped because TabuLLM uses core abstractions plus provider-specific integration packages.
-- Tightened the supported runtime window for the LangChain stack to the tested 1.1.x-1.2.x series, with matching caps on `numpy`, `scipy`, `scikit-learn`, and `pydantic`.
+- Tightened the supported runtime window for the LangChain stack to the tested `langchain-core` 1.1.x-1.2.x series, with matching caps on `numpy`, `scipy`, `scikit-learn`, and `pydantic`.
 - Expanded CI to run the test suite across multiple LangChain minor lines and updated tests to use `langchain_core.embeddings.Embeddings` directly instead of the legacy compatibility shim.
 - Added weekly Dependabot checks for Python dependencies and GitHub Actions so upstream changes surface as reviewable PRs before they reach users.
+- **Breaking:** the minimum supported `numpy` version is now 1.26, the minimum supported `pydantic` version is now 2.7, and the package no longer installs the umbrella `langchain` / `langchain-community` packages as transitive runtime dependencies.
 
 ## [1.2.1]
 
