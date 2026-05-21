@@ -46,7 +46,7 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
 
     Examples
     --------
-    >>> from langchain.embeddings import OpenAIEmbeddings
+    >>> from langchain_openai import OpenAIEmbeddings
     >>> embedding_model = OpenAIEmbeddings()
     >>> transformer = TextColumnTransformer(
     ...     model=embedding_model,

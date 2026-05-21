@@ -8,7 +8,7 @@ A Python package for seamless integration of text embeddings into tabular ML pip
 with tools for clustering and LLM-based interpretation.
 """
 
-__version__ = "1.2.1"
+__version__ = "1.3.0"
 
 # Core components
 from .embed import TextColumnTransformer

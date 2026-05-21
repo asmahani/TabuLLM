@@ -9,7 +9,7 @@ import os
 import warnings
 
 from tabullm import TextColumnTransformer
-from langchain.embeddings.base import Embeddings
+from langchain_core.embeddings import Embeddings
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
@@ -271,6 +271,14 @@ class TestPrepXMutation:
         params_before = t.get_params()
         t.prep_X(df)
         assert t.get_params() == params_before
+
+
+class TestLangChainCompatibility:
+    def test_invalid_model_error_mentions_langchain_core_contract(self):
+        with pytest.raises(TypeError, match=r"langchain_core\.embeddings\.Embeddings"):
+            TextColumnTransformer(model=object()).fit(
+                pd.DataFrame({'text': ['hi']})
+            )
 
 
 class TestNormalize:
