@@ -42,7 +42,8 @@ def load_fraud(data_dir=None, return_metadata=True):
     ``class_weight="balanced"`` in downstream classifiers.
 
     Dataset: Real or Fake Job Posting Prediction (Vidros et al., 2017)
-    Source: https://doi.org/10.5281/zenodo.18884002
+    Original source: https://www.kaggle.com/datasets/shivamb/real-or-fake-fake-jobposting-prediction
+    Zenodo archive (concept DOI): https://doi.org/10.5281/zenodo.18884001
     License: ODbL v1.0
     """
     data_dir = Path(data_dir) if data_dir is not None else _DEFAULT_DATA_DIR

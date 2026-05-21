@@ -11,7 +11,7 @@ os.environ['HF_HUB_OFFLINE'] = '1'
 
 from tabullm import TextColumnTransformer, ClusterExplainer
 from tabullm.explain import _stat_associations, _adjust_pvalues
-from langchain.embeddings.base import Embeddings
+from langchain_core.embeddings import Embeddings
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage
 from langchain_core.outputs import ChatGeneration, ChatResult

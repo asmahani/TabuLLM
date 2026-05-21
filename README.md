@@ -1,5 +1,11 @@
 # TabuLLM
 
+[![Tests](https://github.com/asmahani/TabuLLM/actions/workflows/tests.yml/badge.svg)](https://github.com/asmahani/TabuLLM/actions/workflows/tests.yml)
+[![Coverage](https://codecov.io/gh/asmahani/TabuLLM/branch/main/graph/badge.svg)](https://codecov.io/gh/asmahani/TabuLLM)
+[![PyPI version](https://img.shields.io/pypi/v/tabullm.svg)](https://pypi.org/project/tabullm/)
+[![Python versions](https://img.shields.io/pypi/pyversions/tabullm.svg)](https://pypi.org/project/tabullm/)
+[![License](https://img.shields.io/github/license/asmahani/TabuLLM.svg)](https://github.com/asmahani/TabuLLM/blob/main/LICENSE)
+
 Python package for feature extraction and interpretation of text columns in tabular data using large language models.
 
 ## Overview
