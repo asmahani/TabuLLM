@@ -112,6 +112,10 @@ The [`examples/`](examples/) folder contains Jupyter notebooks demonstrating com
 - [`01_fraud_detection_walkthrough.ipynb`](examples/01_fraud_detection_walkthrough.ipynb) — core TabuLLM workflow on the fraud detection dataset: TF-IDF vs. LLM embeddings, GMM-based dimensionality reduction with cluster quality diagnostics, full `ClusterExplainer` usage (cost preview, outcome-based testing, per-observation diagnostics, narrative synthesis), and a predictive pipeline combining text and structured features
 - [`02_advanced_pipelines.ipynb`](examples/02_advanced_pipelines.ipynb) — advanced pipeline patterns: forward/backward column sweep to measure marginal contribution of each text column, and stacking ensembles (single-split and multi-split) that process column groups independently and combine predictions via a meta-learner
 
+## Reproducibility assets
+
+The [`paper_experiments/`](paper_experiments/) folder contains the scripts, pinned environment, archived summaries, and reproduction instructions used for the SoftwareX fraud-benchmark experiments.
+
 ## Key Features
 
 - sklearn-compatible API (Pipeline, ColumnTransformer, GridSearchCV)

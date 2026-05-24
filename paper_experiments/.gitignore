@@ -1,0 +1,8 @@
+embeddings/
+results/t1_preds/
+results/t2_metrics/
+col_sweep/*.png
+k_sweep/*.png
+__pycache__/
+*.pyc
+.env
