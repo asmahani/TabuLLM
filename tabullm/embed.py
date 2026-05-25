@@ -50,7 +50,6 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
     >>> embedding_model = OpenAIEmbeddings()
     >>> transformer = TextColumnTransformer(
     ...     model=embedding_model,
-    ...     text_columns=['col1', 'col2'],
     ...     colsep=' || ',
     ...     prefix='emb_',
     ...     colnames={'col1': 'Column 1', 'col2': 'Column 2'}

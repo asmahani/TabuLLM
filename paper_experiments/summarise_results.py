@@ -78,7 +78,7 @@ def parse_col_config(label: str) -> tuple[str, int]:
     if label == "full":
         return "full", len(CANONICAL_COLS)
     if label in CANONICAL_COLS:
-        return "individual", CANONICAL_COLS.index(label) + 1
+        return "individual", 1
     m_fwd = re.fullmatch(r"fwd(\d+)", label)
     if m_fwd:
         return "fwd", int(m_fwd.group(1))

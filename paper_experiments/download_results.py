@@ -113,9 +113,11 @@ def download_file(url: str, out_path: Path, force: bool) -> None:
 
 
 def _safe_extract_member(zf: zipfile.ZipFile, member: str, extract_base: Path) -> None:
+    if Path(member).is_absolute():
+        raise RuntimeError(f"Unsafe zip member path (absolute): {member}")
     target = (extract_base / member).resolve()
     base = extract_base.resolve()
-    if not str(target).startswith(str(base)):
+    if not target.is_relative_to(base):
         raise RuntimeError(f"Unsafe zip member path: {member}")
     if member.endswith("/"):
         target.mkdir(parents=True, exist_ok=True)
