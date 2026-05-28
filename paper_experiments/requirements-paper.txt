@@ -14,7 +14,7 @@ langchain-protocol==0.0.15
 langsmith==0.8.5
 numpy==2.4.6
 orjson==3.11.9
-packaging==26.0
+packaging==26.2
 pandas==3.0.3
 pydantic==2.13.4
 pydantic_core==2.46.4
