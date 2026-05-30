@@ -8,7 +8,7 @@ Reproduction package for the fraud-detection experiments in the SoftwareX revisi
 paper_experiments/
 ├── README.md
 ├── .env.example
-├── requirements-paper.txt
+├── paper-requirements.txt
 ├── download_embeddings.py
 ├── download_results.py
 ├── generate_embeddings.py
@@ -41,10 +41,10 @@ pip install tabullm matplotlib
 Use the pinned environment that produced the manuscript results:
 
 ```bash
-pip install -r requirements-paper.txt
+pip install -r paper-requirements.txt
 ```
 
-`requirements-paper.txt` is a `pip freeze` from the Linux/amd64 Python 3.13 environment used for the revision runs.
+`paper-requirements.txt` is a `pip freeze` from the Linux/amd64 Python 3.13 environment used for the revision runs.
 
 ### Credentials
 
@@ -141,7 +141,7 @@ python col_sweep/plot_col_sweep.py --rep minilm
 
 ### Environment used for the paper runs
 
-The sweep experiments were run on x86_64 Linux using the exact versions in `requirements-paper.txt`. Key versions:
+The sweep experiments were run on x86_64 Linux using the exact versions in `paper-requirements.txt`. Key versions:
 
 - `tabullm==1.3.0`
 - `scikit-learn==1.8.0`
