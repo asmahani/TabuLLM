@@ -12,6 +12,12 @@ Python package for feature extraction and interpretation of text columns in tabu
 
 TabuLLM integrates LLM-based text embeddings into scikit-learn pipelines for tabular datasets containing text columns. Built on LangChain and scikit-learn, it provides sklearn-compatible transformers for embedding, dimensionality reduction, and cluster interpretation.
 
+## Paper
+
+TabuLLM is described in our SoftwareX paper:
+
+Sharabiani, M.T.A., Bottle, A., and Mahani, A.S. (2026). *TabuLLM: Feature extraction and interpretation of text columns in tabular data using large language models*. **SoftwareX, 35**, 102810. https://doi.org/10.1016/j.softx.2026.102810
+
 ## Installation
 
 ```bash
@@ -139,4 +145,10 @@ See [CHANGELOG.md](CHANGELOG.md).
 
 ## Citation
 
-Sharabiani, M.T.A., Mahani, A.S., Bottle, A. et al. (2025). GenAI exceeds clinical experts in predicting acute kidney injury following paediatric cardiopulmonary bypass. Scientific Reports, 15, 20847. https://doi.org/10.1038/s41598-025-04651-8
+If you use TabuLLM in academic work, please cite:
+
+Sharabiani, M.T.A., Bottle, A., and Mahani, A.S. (2026). *TabuLLM: Feature extraction and interpretation of text columns in tabular data using large language models*. **SoftwareX, 35**, 102810. https://doi.org/10.1016/j.softx.2026.102810
+
+## Related work
+
+Sharabiani, M.T.A., Mahani, A.S., Bottle, A. et al. (2025). *GenAI exceeds clinical experts in predicting acute kidney injury following paediatric cardiopulmonary bypass*. **Scientific Reports, 15**, 20847. https://doi.org/10.1038/s41598-025-04651-8
