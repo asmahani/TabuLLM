@@ -7,6 +7,8 @@ updates:
     labels:
       - "dependencies"
     open-pull-requests-limit: 10
+    exclude-paths:
+      - "paper_experiments/paper-requirements.txt"
 
   - package-ecosystem: "github-actions"
     directory: "/"
