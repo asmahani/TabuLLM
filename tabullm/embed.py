@@ -35,7 +35,7 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
         Example: {'desc': 'Product Description', 'title': 'Title'}
     colsep : str, default=' || '
         The column separator for concatenating multiple text columns, if applicable.
-    prefix : str, default='X_'
+    prefix : str, default='X\\_'
         The prefix for the returned embedding columns.
     normalize : bool, default=False
         If True, L2-normalize each embedding vector after generation.
@@ -46,7 +46,10 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
 
     Examples
     --------
+    >>> import pandas as pd
     >>> from langchain_openai import OpenAIEmbeddings
+    >>>
+    >>> # Requires an OPENAI_API_KEY in the environment
     >>> embedding_model = OpenAIEmbeddings()
     >>> transformer = TextColumnTransformer(
     ...     model=embedding_model,
@@ -160,11 +163,20 @@ class TextColumnTransformer(BaseEstimator, TransformerMixin):
 
         Examples
         --------
-        >>> # Estimate for free model
+        >>> import pandas as pd
+        >>> from tabullm import TextColumnTransformer
+        >>> from langchain_huggingface import HuggingFaceEmbeddings
+        >>>
+        >>> transformer = TextColumnTransformer(
+        ...     model=HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2')
+        ... )
+        >>> df = pd.DataFrame({'text': ['hello world', 'foo bar baz']})
+        >>>
+        >>> # Estimate for a free, local model
         >>> info = transformer.estimate_tokens(df)
         >>> print(f"Will embed {info['estimated_tokens']:,} tokens")
         >>>
-        >>> # Estimate with cost (AWS Bedrock)
+        >>> # Estimate with cost (e.g. AWS Bedrock pricing)
         >>> info = transformer.estimate_tokens(df, cost_per_1M_tokens=0.02)
         >>> print(f"Estimated cost: ${info['estimated_cost']:.2f}")
         """

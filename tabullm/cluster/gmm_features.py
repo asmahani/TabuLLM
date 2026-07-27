@@ -62,25 +62,30 @@ class GMMFeatureExtractor(BaseEstimator, TransformerMixin):
 
     Attributes
     ----------
-    gmm_ : GaussianMixture
+    gmm\\_ : GaussianMixture
         Fitted Gaussian Mixture Model.
 
-    means_ : array, shape (n_components, n_features)
+    means\\_ : array, shape (n_components, n_features)
         Component means.
 
-    covariances_ : array
+    covariances\\_ : array
         Component covariances.
 
-    labels_ : array, shape (n_samples,)
+    labels\\_ : array, shape (n_samples,)
         Cluster labels for each sample from the training set.
 
     Examples
     --------
     >>> from tabullm import TextColumnTransformer, GMMFeatureExtractor
     >>> from sklearn.pipeline import Pipeline
+    >>> from sklearn.ensemble import RandomForestClassifier
+    >>> from langchain_huggingface import HuggingFaceEmbeddings
     >>>
+    >>> embedding_model = HuggingFaceEmbeddings(
+    ...     model_name='sentence-transformers/all-MiniLM-L6-v2'
+    ... )
     >>> pipeline = Pipeline([
-    ...     ('embed', TextColumnTransformer(model=model, text_columns=['text'])),
+    ...     ('embed', TextColumnTransformer(model=embedding_model)),
     ...     ('gmm', GMMFeatureExtractor(n_components=10)),
     ...     ('clf', RandomForestClassifier())
     ... ])

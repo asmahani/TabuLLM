@@ -14,6 +14,7 @@ Examples
 --------
 >>> from tabullm.cluster import GMMFeatureExtractor
 >>> from sklearn.pipeline import Pipeline
+>>> from sklearn.ensemble import RandomForestClassifier
 >>>
 >>> # GMM feature extraction in pipeline
 >>> pipeline = Pipeline([

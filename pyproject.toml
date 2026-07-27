@@ -53,3 +53,9 @@ examples = [
     "langchain-openai>=1,<2",
     "langchain-aws>=1,<2",
 ]
+docs = [
+    "sphinx>=7.2",
+    "furo>=2024.1.29",
+    "myst-parser>=2.0",
+    "sphinx-copybutton>=0.5.2",
+]
