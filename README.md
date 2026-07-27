@@ -1,6 +1,7 @@
 # TabuLLM
 
 [![Tests](https://github.com/asmahani/TabuLLM/actions/workflows/tests.yml/badge.svg)](https://github.com/asmahani/TabuLLM/actions/workflows/tests.yml)
+[![Docs](https://github.com/asmahani/TabuLLM/actions/workflows/docs.yml/badge.svg)](https://asmahani.github.io/TabuLLM/)
 [![Coverage](https://codecov.io/gh/asmahani/TabuLLM/branch/main/graph/badge.svg)](https://codecov.io/gh/asmahani/TabuLLM)
 [![PyPI version](https://img.shields.io/pypi/v/tabullm.svg)](https://pypi.org/project/tabullm/)
 [![Python versions](https://img.shields.io/pypi/pyversions/tabullm.svg)](https://pypi.org/project/tabullm/)
