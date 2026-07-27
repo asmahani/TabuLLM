@@ -2,6 +2,15 @@
 
 All notable changes to TabuLLM are documented here.
 
+## [1.4.0]
+
+- Added a Sphinx documentation site (Furo theme, MyST Markdown, autodoc/autosummary with Napoleon), published to GitHub Pages at https://asmahani.github.io/TabuLLM/. Covers the README as a landing page, full API reference for `tabullm.__all__`, an examples page linking the two tutorial notebooks with their external requirements, and a paper/reproducibility page. A new `docs` optional dependency group and a `docs.yml` CI workflow build the site (warnings as errors) on every PR/push and deploy it on pushes to `main`.
+- Fixed several stale and incorrect examples in public docstrings, found while building the documentation: `ClusterExplainer`'s class docstring called a nonexistent `GMMFeatureExtractor.fit_predict()` and the obsolete `count_tokens_only=True` argument (now `preview=True`); `GMMFeatureExtractor`'s example passed an unsupported `text_columns=` argument to `TextColumnTransformer`; several examples referenced undefined names (`model`, `RandomForestClassifier`, `df`, `emb_model`, `chat_model`) without importing or defining them. Examples are now self-contained and runnable (credentialed calls are noted in comments).
+- Added the `Documentation` link to `[project.urls]`, a documentation badge to the README, and set the GitHub repository homepage to the published docs site.
+- Widened the supported `langchain-core` range to `>=1.3,<1.6` (from `<1.5`); CI now tests both the minimum supported line and the latest allowed release explicitly.
+- Added the SoftwareX fraud-benchmark reproduction package (`paper_experiments/`): pinned environment, run/summarise/plot scripts, and archived per-fold results, metrics, and rolled-up summaries. Added the published SoftwareX paper citation and DOI to the README.
+- Excluded `paper_experiments/paper-requirements.txt` (a pinned snapshot of the environment used for the paper's benchmark runs) from Dependabot, since it is not meant to track upstream releases.
+
 ## [1.3.0]
 
 - Added README badges for CI, coverage, PyPI version, supported Python versions, and license, and enabled Codecov uploads from the test workflow.
