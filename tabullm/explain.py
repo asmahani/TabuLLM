@@ -130,17 +130,24 @@ class ClusterExplainer:
 
     Examples
     --------
-    >>> from tabullm import TextColumnTransformer, GMMFeatureExtractor, ClusterExplainer
+    >>> from tabullm import load_fraud, TextColumnTransformer, GMMFeatureExtractor, ClusterExplainer
+    >>> from langchain_huggingface import HuggingFaceEmbeddings
+    >>> from langchain_openai import ChatOpenAI
+    >>>
+    >>> X, y, metadata = load_fraud()
+    >>> text_cols = ['title', 'description']
     >>>
     >>> # Embed and cluster
-    >>> transformer = TextColumnTransformer(model=emb_model)
-    >>> X_embedded = transformer.fit_transform(df[['description', 'title']])
-    >>> gmm = GMMFeatureExtractor(n_components=10)
-    >>> cluster_labels = gmm.fit_predict(X_embedded)
+    >>> transformer = TextColumnTransformer(model=HuggingFaceEmbeddings(
+    ...     model_name='sentence-transformers/all-MiniLM-L6-v2'
+    ... ))
+    >>> X_embedded = transformer.fit_transform(X[text_cols])
+    >>> gmm = GMMFeatureExtractor(n_components=10, random_state=42).fit(X_embedded)
+    >>> cluster_labels = gmm.labels_
     >>>
-    >>> # Initialize explainer
+    >>> # Initialize explainer (requires an OPENAI_API_KEY in the environment)
     >>> explainer = ClusterExplainer(
-    ...     llm=chat_model,
+    ...     llm=ChatOpenAI(model='gpt-4o-mini'),
     ...     text_transformer=transformer,
     ...     observations="job postings",
     ...     text_fields="titles and descriptions",
@@ -148,11 +155,11 @@ class ClusterExplainer:
     ... )
     >>>
     >>> # Estimate cost first
-    >>> info = explainer.explain(df, cluster_labels, count_tokens_only=True)
+    >>> info = explainer.explain(X[text_cols], cluster_labels, preview=True)
     >>> print(f"Cost: ${info['estimated_cost']:.2f}")
     >>>
     >>> # Generate explanations
-    >>> explanations = explainer.explain(df, cluster_labels, strategy='auto')
+    >>> explanations = explainer.explain(X[text_cols], cluster_labels, strategy='auto')
     """
     
     parser = PydanticOutputParser(pydantic_object=MultipleGroupLabels)
